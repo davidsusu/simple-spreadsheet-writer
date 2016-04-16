@@ -15,34 +15,34 @@ public class MergeSortedIterator<E> implements Iterator<E> {
 
     protected final List<PeekingIterator<E>> peekingIterators = new ArrayList<PeekingIterator<E>>();
     
-    protected final Comparator<E> comparator;
+    protected final Comparator<? super E> comparator;
     
     protected final Merger<E> merger;
 
     @SafeVarargs
     public MergeSortedIterator(Iterator<E>... iterators) {
-        this(Arrays.asList(iterators), new NaturalComparator<E>(), new DefaultMerger<E>());
+        this(Arrays.asList(iterators), new NaturalComparator(), new DefaultMerger<E>());
     }
 
     @SuppressWarnings("unchecked")
-	public MergeSortedIterator(Iterator<E> iterator1, Iterator<E> iterator2, Comparator<E> comparator) {
+	public MergeSortedIterator(Iterator<E> iterator1, Iterator<E> iterator2, Comparator<? super E> comparator) {
         this(Arrays.asList(iterator1, iterator2), comparator, new DefaultMerger<E>());
     }
 
     @SuppressWarnings("unchecked")
-    public MergeSortedIterator(Iterator<E> iterator1, Iterator<E> iterator2, Comparator<E> comparator, Merger<E> merger) {
+    public MergeSortedIterator(Iterator<E> iterator1, Iterator<E> iterator2, Comparator<? super E> comparator, Merger<E> merger) {
         this(Arrays.asList(iterator1, iterator2), comparator, merger);
     }
 
     public MergeSortedIterator(Collection<Iterator<E>> iterators) {
-        this(iterators, new NaturalComparator<E>(), new DefaultMerger<E>());
+        this(iterators, new NaturalComparator(), new DefaultMerger<E>());
     }
 
-    public MergeSortedIterator(Collection<Iterator<E>> iterators, Comparator<E> comparator) {
+    public MergeSortedIterator(Collection<Iterator<E>> iterators, Comparator<? super E> comparator) {
         this(iterators, comparator, new DefaultMerger<E>());
     }
     
-    public MergeSortedIterator(Collection<Iterator<E>> iterators, Comparator<E> comparator, Merger<E> merger) {
+    public MergeSortedIterator(Collection<Iterator<E>> iterators, Comparator<? super E> comparator, Merger<E> merger) {
         for (Iterator<E> iterator: iterators) {
             this.peekingIterators.add(new PeekingIterator<E>(iterator));
         }
