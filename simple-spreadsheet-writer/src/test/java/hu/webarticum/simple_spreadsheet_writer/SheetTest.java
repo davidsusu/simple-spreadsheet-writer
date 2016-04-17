@@ -5,13 +5,55 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SheetTest {
 
     @Test
     public void testEmptySheet() {
         Sheet sheet = new Sheet();
+        
+        assertFalse(sheet.hasNegative());
+        assertEquals(0, sheet.getWidth());
+        assertEquals(0, sheet.getHeight());
+        assertEquals(0, sheet.getDefinedWidth());
+        assertEquals(0, sheet.getDefinedHeight());
+        assertFalse(sheet.iterator().hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_CELLS).hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_ROWS).hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_COLUMNS).hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_AREAS).hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_COMBINED).hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_ALL).hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_FULL).hasNext());
+
+        sheet.writeText(-1, -1, "Test text");
+
+        assertTrue(sheet.hasNegative());
+        assertEquals(1, sheet.getWidth());
+        assertEquals(1, sheet.getHeight());
+
+        sheet.removeCell(-1, -1);
+        sheet.writeText(1, 1, "Test text");
+
+        assertFalse(sheet.hasNegative());
+        assertEquals(2, sheet.getWidth());
+        assertEquals(2, sheet.getHeight());
+        assertEquals(1, sheet.getDefinedWidth());
+        assertEquals(1, sheet.getDefinedHeight());
+        assertTrue(sheet.iterator().hasNext());
+        assertTrue(sheet.iterator(Sheet.ITERATOR_CELLS).hasNext());
+        assertTrue(sheet.iterator(Sheet.ITERATOR_ROWS).hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_COLUMNS).hasNext());
+        assertFalse(sheet.iterator(Sheet.ITERATOR_AREAS).hasNext());
+        assertTrue(sheet.iterator(Sheet.ITERATOR_COMBINED).hasNext());
+        assertTrue(sheet.iterator(Sheet.ITERATOR_ALL).hasNext());
+        assertTrue(sheet.iterator(Sheet.ITERATOR_FULL).hasNext());
+        
+        sheet.removeCell(1, 1);
+
         assertFalse(sheet.hasNegative());
         assertEquals(0, sheet.getWidth());
         assertEquals(0, sheet.getHeight());
@@ -60,7 +102,15 @@ public class SheetTest {
             assertTrue(sheet.hasCell(2, 3));
             assertFalse(sheet.hasCell(2, 2));
             assertNull(sheet.getCell(3, 3));
+            
+            assertEquals("Fake text", sheet.getCell(3, 3, new Sheet.Cell("Fake text")).text);
+
+            assertTrue(sheet.hasCell(3, 3));
+            sheet.removeCell(3, 3);
+            assertFalse(sheet.hasCell(3, 3));
+            
             assertTrue(sheet.iterator().hasNext());
+            assertFalse(sheet.iterator(0).hasNext());
             assertTrue(sheet.iterator(Sheet.ITERATOR_CELLS).hasNext());
             assertTrue(sheet.iterator(Sheet.ITERATOR_ROWS).hasNext());
             assertFalse(sheet.iterator(Sheet.ITERATOR_COLUMNS).hasNext());
@@ -156,7 +206,35 @@ public class SheetTest {
 
     @Test
     public void testComplexSheet() {
-        // TODO
+    	Sheet sheet1 = new Sheet();
+    	
+    	// TODO: build sheet1
+
+    	Sheet sheet2 = new Sheet(sheet1);
+    	Sheet sheet3 = new Sheet(sheet2);
+    	
+    	Map<String, Sheet> sheetMap = new LinkedHashMap<String, Sheet>();
+    	sheetMap.put("Sheet.1", sheet1);
+    	sheetMap.put("Sheet.2", sheet2);
+    	sheetMap.put("Sheet.3", sheet3);
+    	
+    	for (Map.Entry<String, Sheet> entry: sheetMap.entrySet()) {
+    		String sheetName = entry.getKey();
+    		Sheet sheet = entry.getValue();
+    		try {
+    		
+    			// TODO: test sheet, assert with sheetName
+    			
+    		} catch (Throwable e) {
+    			fail(sheetName + ": unexpected exception");
+    			e.printStackTrace();
+    		}
+    	}
     }
 
+
+    @Test
+    public void testMove() {
+    	// TODO
+    }
 }

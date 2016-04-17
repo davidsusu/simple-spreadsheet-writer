@@ -33,6 +33,13 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     
     private Set<Area> areas = new LinkedHashSet<Area>();
 
+    public Sheet() {
+    }
+    
+    public Sheet(Sheet baseSheet) {
+    	
+    }
+    
     @Override
     public Iterator<CellEntry> iterator() {
         return iterator(ITERATOR_FULL);

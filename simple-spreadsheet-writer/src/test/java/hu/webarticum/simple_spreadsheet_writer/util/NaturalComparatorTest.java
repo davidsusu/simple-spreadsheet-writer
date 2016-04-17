@@ -20,6 +20,12 @@ public class NaturalComparatorTest {
 			fail();
 		} catch (ClassCastException e) {
 		}
+
+		try {
+			comparator.compare(integer1, object2);
+			fail();
+		} catch (ClassCastException e) {
+		}
 	}
 
 }
