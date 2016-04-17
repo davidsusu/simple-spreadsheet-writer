@@ -483,6 +483,58 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         return cellEntry;
     }
     
+    public void move(int verticalMove, int horizontalMove) {
+    	if (verticalMove == 0 && horizontalMove == 0) {
+    		return;
+    	}
+    	if (verticalMove != 0) {
+    		TreeMap<Integer, Row> newRows = new TreeMap<Integer, Row>();
+    		for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
+    			newRows.put(entry.getKey() + verticalMove, entry.getValue());
+    		}
+    		rows = newRows;
+    	}
+    	if (horizontalMove > 0) {
+    		TreeMap<Integer, Column> newColumns = new TreeMap<Integer, Column>();
+    		for (Map.Entry<Integer, Column> entry: columns.entrySet()) {
+    			newColumns.put(entry.getKey() + horizontalMove, entry.getValue());
+    		}
+    		columns = newColumns;
+    		for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
+    			Row row = entry.getValue();
+        		TreeMap<Integer, Cell> newCells = new TreeMap<Integer, Cell>();
+        		for (Map.Entry<Integer, Cell> _entry: row.cells.entrySet()) {
+        			newCells.put(_entry.getKey() + horizontalMove, _entry.getValue());
+        		}
+    		}
+    	}
+    	for (Area area: areas) {
+    		for (Range range: area.ranges) {
+    			range.rowIndex1 += verticalMove;
+    			range.columnIndex1 += horizontalMove;
+    			range.rowIndex2 += verticalMove;
+    			range.columnIndex2 += horizontalMove;
+    		}
+    	}
+    }
+    
+    public int[] moveToNonNegative() {
+    	int verticalMove = 0;
+    	int horizontalMove = 0;
+    	if (!isEmpty()) {
+    		int minRowIndex = getMinRowIndex();
+    		if (minRowIndex < 0) {
+    			verticalMove = -minRowIndex;
+    		}
+    		int minColumnIndex = getMinColumnIndex();
+    		if (minColumnIndex < 0) {
+    			horizontalMove = -minColumnIndex;
+    		}
+    	}
+    	move(verticalMove, horizontalMove);
+    	return new int[]{verticalMove, horizontalMove};
+    }
+    
     private <T> void cutFromTreeMap(TreeMap<Integer, T> map, int index) {
         map.remove(index);
         SortedMap<Integer, T> afterItemsView = map.subMap(index+1, Integer.MAX_VALUE);
