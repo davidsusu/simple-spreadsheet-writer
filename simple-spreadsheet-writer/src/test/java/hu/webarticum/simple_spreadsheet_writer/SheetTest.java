@@ -234,7 +234,45 @@ public class SheetTest {
 
 
     @Test
-    public void testMove() {
+    public void testSimpleMove() {
+    	Sheet sheet = new Sheet();
+    	sheet.writeText(-1,  -1, "Text");
+    	
+    	assertEquals(1, sheet.getWidth());
+    	assertEquals(1, sheet.getHeight());
+    	assertEquals(1, sheet.getDefinedWidth());
+    	assertEquals(1, sheet.getDefinedHeight());
+    	assertEquals("Text", sheet.getCell(-1, -1).text);
+    	assertNull(sheet.getCell(0, 0));
+    	assertNull(sheet.getCell(1, 2));
+    	
+    	int[] movedWith = sheet.moveToNonNegative();
+
+    	assertEquals(1, movedWith[0]);
+    	assertEquals(1, movedWith[1]);
+
+    	assertEquals(1, sheet.getWidth());
+    	assertEquals(1, sheet.getHeight());
+    	assertEquals(1, sheet.getDefinedWidth());
+    	assertEquals(1, sheet.getDefinedHeight());
+    	assertNull(sheet.getCell(-1, -1));
+    	assertEquals("Text", sheet.getCell(0, 0).text);
+    	assertNull(sheet.getCell(1, 2));
+    	
+    	sheet.move(1, 2);
+
+    	assertEquals(3, sheet.getWidth());
+    	assertEquals(2, sheet.getHeight());
+    	assertEquals(1, sheet.getDefinedWidth());
+    	assertEquals(1, sheet.getDefinedHeight());
+    	assertNull(sheet.getCell(-1, -1));
+    	assertNull(sheet.getCell(0, 0));
+    	assertEquals("Text", sheet.getCell(1, 2).text);
+    }
+
+    @Test
+    public void testComplexMove() {
     	// TODO
     }
+    
 }

@@ -506,6 +506,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         		for (Map.Entry<Integer, Cell> _entry: row.cells.entrySet()) {
         			newCells.put(_entry.getKey() + horizontalMove, _entry.getValue());
         		}
+        		row.cells = newCells;
     		}
     	}
     	for (Area area: areas) {
