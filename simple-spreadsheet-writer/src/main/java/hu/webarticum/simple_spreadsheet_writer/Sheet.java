@@ -37,7 +37,36 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     }
     
     public Sheet(Sheet baseSheet) {
-    	
+    	for (Map.Entry<Integer, Row> entry: baseSheet.rows.entrySet()) {
+    		Integer rowIndex = entry.getKey();
+    		Row baseRow = entry.getValue();
+    		Row row = new Row();
+    		row.height = baseRow.height;
+    		row.format = new Format(baseRow.format);
+    		for (Map.Entry<Integer, Cell> _entry: baseRow.cells.entrySet()) {
+    			Integer columnIndex = _entry.getKey();
+    			Cell baseCell = _entry.getValue();
+    			Cell cell = new Cell(baseCell);
+    			row.cells.put(columnIndex, cell);
+    		}
+    		this.rows.put(rowIndex, row);
+    	}
+    	for (Map.Entry<Integer, Column> entry: baseSheet.columns.entrySet()) {
+    		Integer columnIndex = entry.getKey();
+    		Column baseColumn = entry.getValue();
+    		Column column = new Column();
+    		column.width = baseColumn.width;
+    		column.format = new Format(baseColumn.format);
+    		this.columns.put(columnIndex, column);
+    	}
+    	for (Area baseArea: areas) {
+    		Area area = new Area();
+    		for (Range baseRange: baseArea.ranges) {
+    			area.ranges.add(new Range(baseRange));
+    		}
+    		area.format = new Format(baseArea.format);
+    		this.areas.add(area);
+    	}
     }
     
     @Override
@@ -480,7 +509,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     
     static public class Row {
 
-        public Integer width = null;
+        public int height = 0;
         
         public Format format = new Format();
         
@@ -490,7 +519,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     
     static public class Column {
 
-        public Integer width = null;
+        public int width = 0;
         
         public Format format = new Format();
         
@@ -513,6 +542,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
             this.columnIndex2 = columnIndex2;
         }
 
+        public Range(Range baseRange) {
+        	this(baseRange.rowIndex1, baseRange.columnIndex1, baseRange.rowIndex2, baseRange.columnIndex2);
+        }
+        
         public boolean contains(int rowIndex, int columnIndex) {
             return (
                 isBetween(rowIndex, rowIndex1, rowIndex2) &&
@@ -628,13 +661,26 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
             this.text = text;
             this.format = format;
         }
-        
+
+        public Cell(Cell baseCell) {
+            this(baseCell.type, baseCell.text, new Format(baseCell.format));
+        }
+
     }
 
     // XXX <String, FormatValue>?
     static public class Format extends HashMap<String, String> {
 
         private static final long serialVersionUID = 1L;
+        
+        public Format() {
+        }
+        
+        public Format(Format baseFormat) {
+        	for (Map.Entry<String, String> entry: baseFormat.entrySet()) {
+        		this.put(entry.getKey(), entry.getValue());
+        	}
+        }
         
         public String toCssString() {
             StringBuilder cssTextBuilder = new StringBuilder();
