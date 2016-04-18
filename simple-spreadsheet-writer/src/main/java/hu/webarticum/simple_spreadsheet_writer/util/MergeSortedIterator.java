@@ -25,7 +25,7 @@ public class MergeSortedIterator<E> implements Iterator<E> {
     }
 
     @SuppressWarnings("unchecked")
-	public MergeSortedIterator(Iterator<E> iterator1, Iterator<E> iterator2, Comparator<? super E> comparator) {
+    public MergeSortedIterator(Iterator<E> iterator1, Iterator<E> iterator2, Comparator<? super E> comparator) {
         this(Arrays.asList(iterator1, iterator2), comparator, new DefaultMerger<E>());
     }
 

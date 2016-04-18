@@ -29,14 +29,14 @@ public class SheetTest {
         assertFalse(sheet.iterator(Sheet.ITERATOR_ALL).hasNext());
         assertFalse(sheet.iterator(Sheet.ITERATOR_FULL).hasNext());
 
-        sheet.writeText(-1, -1, "Test text");
+        sheet.write(-1, -1, "Test text");
 
         assertTrue(sheet.hasNegative());
         assertEquals(1, sheet.getWidth());
         assertEquals(1, sheet.getHeight());
 
         sheet.removeCell(-1, -1);
-        sheet.writeText(1, 1, "Test text");
+        sheet.write(1, 1, "Test text");
 
         assertFalse(sheet.hasNegative());
         assertEquals(2, sheet.getWidth());
@@ -72,8 +72,8 @@ public class SheetTest {
     @Test
     public void testNegativePositionSheet() {
         Sheet sheet = new Sheet();
-        sheet.writeText(-3, -4, "Test text 1");
-        sheet.writeText(1, 3, "Test text 2");
+        sheet.write(-3, -4, "Test text 1");
+        sheet.write(1, 3, "Test text 2");
         assertTrue(sheet.hasNegative());
         assertEquals(8, sheet.getWidth());
         assertEquals(5, sheet.getHeight());
@@ -89,8 +89,8 @@ public class SheetTest {
     public void testSimpleSheet() {
         {
             Sheet sheet = new Sheet();
-            sheet.writeText(1, 2, "Test text 1");
-            sheet.writeText(2, 3, "Test text 2");
+            sheet.write(1, 2, "Test text 1");
+            sheet.write(2, 3, "Test text 2");
             assertFalse(sheet.hasNegative());
             assertEquals(4, sheet.getWidth());
             assertEquals(3, sheet.getHeight());
@@ -206,73 +206,102 @@ public class SheetTest {
 
     @Test
     public void testComplexSheet() {
-    	Sheet sheet1 = new Sheet();
-    	
-    	// TODO: build sheet1
-
-    	Sheet sheet2 = new Sheet(sheet1);
-    	Sheet sheet3 = new Sheet(sheet2);
-    	
-    	Map<String, Sheet> sheetMap = new LinkedHashMap<String, Sheet>();
-    	sheetMap.put("Sheet.1", sheet1);
-    	sheetMap.put("Sheet.2", sheet2);
-    	sheetMap.put("Sheet.3", sheet3);
-    	
-    	for (Map.Entry<String, Sheet> entry: sheetMap.entrySet()) {
-    		String sheetName = entry.getKey();
-    		Sheet sheet = entry.getValue();
-    		try {
-    		
-    			// TODO: test sheet, assert with sheetName
-    			
-    		} catch (Throwable e) {
-    			fail(sheetName + ": unexpected exception");
-    			e.printStackTrace();
-    		}
-    	}
+        Sheet sheet1 = new Sheet();
+        
+        sheet1.write(1, 1, "Test cell 1");
+        sheet1.write(1, 2, "Test cell 2", new Sheet.Format(new String[]{
+            "font-weight", "bold",
+            "background-color", "#FF0000"
+        }));
+        
+        {
+            Sheet.Area area = new Sheet.Area(new int[]{
+                1, 2, 1, 2,
+                3, 0, 4, 5,
+            }, new Sheet.Format(new String[]{
+                "font-style", "italic",
+                "background-color", "#FFFF00",
+                "color", "#0000FF",
+            }));
+            assertFalse(area.contains(0, 1));
+            assertTrue(area.contains(1, 2));
+            assertFalse(area.contains(2, 2));
+            assertTrue(area.contains(3, 2));
+            assertTrue(area.contains(4, 5));
+            assertFalse(area.contains(5, 6));
+            sheet1.addArea(area);
+        }
+        
+        sheet1.addArea(new Sheet.Area(3, 1, 3, 2, new Sheet.Format(new String[]{
+            "color", "#CC9900",
+            "text-decoration", "underline",
+        })));
+        
+        // TODO
+        
+        Sheet sheet2 = new Sheet(sheet1);
+        Sheet sheet3 = new Sheet(sheet2);
+        
+        Map<String, Sheet> sheetMap = new LinkedHashMap<String, Sheet>();
+        sheetMap.put("Sheet.1", sheet1);
+        sheetMap.put("Sheet.2", sheet2);
+        sheetMap.put("Sheet.3", sheet3);
+        
+        for (Map.Entry<String, Sheet> entry: sheetMap.entrySet()) {
+            String sheetName = entry.getKey();
+            Sheet sheet = entry.getValue();
+            try {
+            
+                // TODO: test sheet, assert with sheetName
+                
+            } catch (Throwable e) {
+                fail(sheetName + ": unexpected exception");
+                e.printStackTrace();
+            }
+        }
     }
 
 
     @Test
     public void testSimpleMove() {
-    	Sheet sheet = new Sheet();
-    	sheet.writeText(-1,  -1, "Text");
-    	
-    	assertEquals(1, sheet.getWidth());
-    	assertEquals(1, sheet.getHeight());
-    	assertEquals(1, sheet.getDefinedWidth());
-    	assertEquals(1, sheet.getDefinedHeight());
-    	assertEquals("Text", sheet.getCell(-1, -1).text);
-    	assertNull(sheet.getCell(0, 0));
-    	assertNull(sheet.getCell(1, 2));
-    	
-    	int[] movedWith = sheet.moveToNonNegative();
+        Sheet sheet = new Sheet();
+        sheet.write(-1,  -1, "Text");
+        
+        assertEquals(1, sheet.getWidth());
+        assertEquals(1, sheet.getHeight());
+        assertEquals(1, sheet.getDefinedWidth());
+        assertEquals(1, sheet.getDefinedHeight());
+        assertEquals("Text", sheet.getCell(-1, -1).text);
+        assertNull(sheet.getCell(0, 0));
+        assertNull(sheet.getCell(1, 2));
+        
+        int[] movedWith = sheet.moveToNonNegative();
 
-    	assertEquals(1, movedWith[0]);
-    	assertEquals(1, movedWith[1]);
+        assertEquals(1, movedWith[0]);
+        assertEquals(1, movedWith[1]);
 
-    	assertEquals(1, sheet.getWidth());
-    	assertEquals(1, sheet.getHeight());
-    	assertEquals(1, sheet.getDefinedWidth());
-    	assertEquals(1, sheet.getDefinedHeight());
-    	assertNull(sheet.getCell(-1, -1));
-    	assertEquals("Text", sheet.getCell(0, 0).text);
-    	assertNull(sheet.getCell(1, 2));
-    	
-    	sheet.move(1, 2);
+        assertEquals(1, sheet.getWidth());
+        assertEquals(1, sheet.getHeight());
+        assertEquals(1, sheet.getDefinedWidth());
+        assertEquals(1, sheet.getDefinedHeight());
+        assertNull(sheet.getCell(-1, -1));
+        assertEquals("Text", sheet.getCell(0, 0).text);
+        assertNull(sheet.getCell(1, 2));
+        
+        sheet.move(1, 2);
 
-    	assertEquals(3, sheet.getWidth());
-    	assertEquals(2, sheet.getHeight());
-    	assertEquals(1, sheet.getDefinedWidth());
-    	assertEquals(1, sheet.getDefinedHeight());
-    	assertNull(sheet.getCell(-1, -1));
-    	assertNull(sheet.getCell(0, 0));
-    	assertEquals("Text", sheet.getCell(1, 2).text);
+        assertEquals(3, sheet.getWidth());
+        assertEquals(2, sheet.getHeight());
+        assertEquals(1, sheet.getDefinedWidth());
+        assertEquals(1, sheet.getDefinedHeight());
+        assertNull(sheet.getCell(-1, -1));
+        assertNull(sheet.getCell(0, 0));
+        assertEquals("Text", sheet.getCell(1, 2).text);
     }
 
     @Test
     public void testComplexMove() {
-    	// TODO
+        // TODO
     }
     
 }

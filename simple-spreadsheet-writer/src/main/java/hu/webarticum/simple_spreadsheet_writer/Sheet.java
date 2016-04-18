@@ -37,36 +37,36 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     }
     
     public Sheet(Sheet baseSheet) {
-    	for (Map.Entry<Integer, Row> entry: baseSheet.rows.entrySet()) {
-    		Integer rowIndex = entry.getKey();
-    		Row baseRow = entry.getValue();
-    		Row row = new Row();
-    		row.height = baseRow.height;
-    		row.format = new Format(baseRow.format);
-    		for (Map.Entry<Integer, Cell> _entry: baseRow.cells.entrySet()) {
-    			Integer columnIndex = _entry.getKey();
-    			Cell baseCell = _entry.getValue();
-    			Cell cell = new Cell(baseCell);
-    			row.cells.put(columnIndex, cell);
-    		}
-    		this.rows.put(rowIndex, row);
-    	}
-    	for (Map.Entry<Integer, Column> entry: baseSheet.columns.entrySet()) {
-    		Integer columnIndex = entry.getKey();
-    		Column baseColumn = entry.getValue();
-    		Column column = new Column();
-    		column.width = baseColumn.width;
-    		column.format = new Format(baseColumn.format);
-    		this.columns.put(columnIndex, column);
-    	}
-    	for (Area baseArea: areas) {
-    		Area area = new Area();
-    		for (Range baseRange: baseArea.ranges) {
-    			area.ranges.add(new Range(baseRange));
-    		}
-    		area.format = new Format(baseArea.format);
-    		this.areas.add(area);
-    	}
+        for (Map.Entry<Integer, Row> entry: baseSheet.rows.entrySet()) {
+            Integer rowIndex = entry.getKey();
+            Row baseRow = entry.getValue();
+            Row row = new Row();
+            row.height = baseRow.height;
+            row.format = new Format(baseRow.format);
+            for (Map.Entry<Integer, Cell> _entry: baseRow.cells.entrySet()) {
+                Integer columnIndex = _entry.getKey();
+                Cell baseCell = _entry.getValue();
+                Cell cell = new Cell(baseCell);
+                row.cells.put(columnIndex, cell);
+            }
+            this.rows.put(rowIndex, row);
+        }
+        for (Map.Entry<Integer, Column> entry: baseSheet.columns.entrySet()) {
+            Integer columnIndex = entry.getKey();
+            Column baseColumn = entry.getValue();
+            Column column = new Column();
+            column.width = baseColumn.width;
+            column.format = new Format(baseColumn.format);
+            this.columns.put(columnIndex, column);
+        }
+        for (Area baseArea: areas) {
+            Area area = new Area();
+            for (Range baseRange: baseArea.ranges) {
+                area.ranges.add(new Range(baseRange));
+            }
+            area.format = new Format(baseArea.format);
+            this.areas.add(area);
+        }
     }
     
     @Override
@@ -242,11 +242,11 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         return maxColumnIndex;
     }
 
-    public void writeText(int rowIndex, int ColumnIndex, String text) {
+    public void write(int rowIndex, int ColumnIndex, String text) {
         setCell(rowIndex, ColumnIndex, new Cell(text));
     }
 
-    public void writeText(int rowIndex, int ColumnIndex, String text, Format format) {
+    public void write(int rowIndex, int ColumnIndex, String text, Format format) {
         setCell(rowIndex, ColumnIndex, new Cell(text, format));
     }
     
@@ -484,56 +484,56 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     }
     
     public void move(int verticalMove, int horizontalMove) {
-    	if (verticalMove == 0 && horizontalMove == 0) {
-    		return;
-    	}
-    	if (verticalMove != 0) {
-    		TreeMap<Integer, Row> newRows = new TreeMap<Integer, Row>();
-    		for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
-    			newRows.put(entry.getKey() + verticalMove, entry.getValue());
-    		}
-    		rows = newRows;
-    	}
-    	if (horizontalMove > 0) {
-    		TreeMap<Integer, Column> newColumns = new TreeMap<Integer, Column>();
-    		for (Map.Entry<Integer, Column> entry: columns.entrySet()) {
-    			newColumns.put(entry.getKey() + horizontalMove, entry.getValue());
-    		}
-    		columns = newColumns;
-    		for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
-    			Row row = entry.getValue();
-        		TreeMap<Integer, Cell> newCells = new TreeMap<Integer, Cell>();
-        		for (Map.Entry<Integer, Cell> _entry: row.cells.entrySet()) {
-        			newCells.put(_entry.getKey() + horizontalMove, _entry.getValue());
-        		}
-        		row.cells = newCells;
-    		}
-    	}
-    	for (Area area: areas) {
-    		for (Range range: area.ranges) {
-    			range.rowIndex1 += verticalMove;
-    			range.columnIndex1 += horizontalMove;
-    			range.rowIndex2 += verticalMove;
-    			range.columnIndex2 += horizontalMove;
-    		}
-    	}
+        if (verticalMove == 0 && horizontalMove == 0) {
+            return;
+        }
+        if (verticalMove != 0) {
+            TreeMap<Integer, Row> newRows = new TreeMap<Integer, Row>();
+            for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
+                newRows.put(entry.getKey() + verticalMove, entry.getValue());
+            }
+            rows = newRows;
+        }
+        if (horizontalMove > 0) {
+            TreeMap<Integer, Column> newColumns = new TreeMap<Integer, Column>();
+            for (Map.Entry<Integer, Column> entry: columns.entrySet()) {
+                newColumns.put(entry.getKey() + horizontalMove, entry.getValue());
+            }
+            columns = newColumns;
+            for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
+                Row row = entry.getValue();
+                TreeMap<Integer, Cell> newCells = new TreeMap<Integer, Cell>();
+                for (Map.Entry<Integer, Cell> _entry: row.cells.entrySet()) {
+                    newCells.put(_entry.getKey() + horizontalMove, _entry.getValue());
+                }
+                row.cells = newCells;
+            }
+        }
+        for (Area area: areas) {
+            for (Range range: area.ranges) {
+                range.rowIndex1 += verticalMove;
+                range.columnIndex1 += horizontalMove;
+                range.rowIndex2 += verticalMove;
+                range.columnIndex2 += horizontalMove;
+            }
+        }
     }
     
     public int[] moveToNonNegative() {
-    	int verticalMove = 0;
-    	int horizontalMove = 0;
-    	if (!isEmpty()) {
-    		int minRowIndex = getMinRowIndex();
-    		if (minRowIndex < 0) {
-    			verticalMove = -minRowIndex;
-    		}
-    		int minColumnIndex = getMinColumnIndex();
-    		if (minColumnIndex < 0) {
-    			horizontalMove = -minColumnIndex;
-    		}
-    	}
-    	move(verticalMove, horizontalMove);
-    	return new int[]{verticalMove, horizontalMove};
+        int verticalMove = 0;
+        int horizontalMove = 0;
+        if (!isEmpty()) {
+            int minRowIndex = getMinRowIndex();
+            if (minRowIndex < 0) {
+                verticalMove = -minRowIndex;
+            }
+            int minColumnIndex = getMinColumnIndex();
+            if (minColumnIndex < 0) {
+                horizontalMove = -minColumnIndex;
+            }
+        }
+        move(verticalMove, horizontalMove);
+        return new int[]{verticalMove, horizontalMove};
     }
     
     private <T> void cutFromTreeMap(TreeMap<Integer, T> map, int index) {
@@ -596,7 +596,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         }
 
         public Range(Range baseRange) {
-        	this(baseRange.rowIndex1, baseRange.columnIndex1, baseRange.rowIndex2, baseRange.columnIndex2);
+            this(baseRange.rowIndex1, baseRange.columnIndex1, baseRange.rowIndex2, baseRange.columnIndex2);
         }
         
         public boolean contains(int rowIndex, int columnIndex) {
@@ -623,6 +623,34 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         public List<Range> ranges = new ArrayList<Range>();
         
         public Format format = new Format();
+        
+        public Area() {
+        }
+        
+        public Area(int... rangeIndexes) {
+            int size = rangeIndexes.length / 4;
+            for (int i = 0; i < size; i++) {
+                ranges.add(new Range(
+                    rangeIndexes[i * 4],
+                    rangeIndexes[i * 4 + 1],
+                    rangeIndexes[i * 4 + 2],
+                    rangeIndexes[i * 4 + 3]
+                ));
+            }
+        }
+
+        public Area(int[] rangeIndexes, Format format) {
+            this(rangeIndexes);
+            this.format = format;
+        }
+
+        public Area(
+            int rowIndex1, int columnIndex1, int rowIndex2, int columnIndex2,
+            Format format
+        ) {
+            this.ranges.add(new Range(rowIndex1, columnIndex1, rowIndex2, columnIndex2));
+            this.format = format;
+        }
         
         public boolean contains(int rowIndex, int columnIndex) {
             for (Range range: ranges) {
@@ -730,9 +758,16 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         }
         
         public Format(Format baseFormat) {
-        	for (Map.Entry<String, String> entry: baseFormat.entrySet()) {
-        		this.put(entry.getKey(), entry.getValue());
-        	}
+            for (Map.Entry<String, String> entry: baseFormat.entrySet()) {
+                this.put(entry.getKey(), entry.getValue());
+            }
+        }
+        
+        public Format(String[] propertiesAndValues) {
+            int size = propertiesAndValues.length / 2;
+            for (int i = 0; i < size; i++) {
+                this.put(propertiesAndValues[i * 2], propertiesAndValues[i * 2 + 1]);
+            }
         }
         
         public String toCssString() {
