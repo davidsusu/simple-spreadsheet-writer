@@ -6,6 +6,8 @@ import java.io.OutputStream;
 
 public interface SpreadsheetDumper {
 
+    public String getDefaultExtension();
+    
     public void dump(Spreadsheet spreadheet, File file) throws IOException;
     
     public void dump(Spreadsheet spreadheet, OutputStream outputStram) throws IOException;

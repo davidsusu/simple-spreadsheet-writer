@@ -9,6 +9,11 @@ import java.io.OutputStream;
 public class HtmlSpreadsheetDumper implements SpreadsheetDumper {
 
     @Override
+    public String getDefaultExtension() {
+        return "html";
+    }
+    
+    @Override
     public void dump(Spreadsheet spreadheet, File file) throws IOException {
         dump(spreadheet, new FileOutputStream(file));
     }

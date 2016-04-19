@@ -11,6 +11,11 @@ import org.odftoolkit.simple.table.Table;
 public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
 
     @Override
+    public String getDefaultExtension() {
+        return "ods";
+    }
+    
+    @Override
     public void dump(Spreadsheet spreadheet, File file) throws IOException {
         dump(spreadheet, new FileOutputStream(file));
     }
