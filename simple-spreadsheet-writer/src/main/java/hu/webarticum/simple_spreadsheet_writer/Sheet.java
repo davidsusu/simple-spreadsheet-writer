@@ -59,7 +59,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
             column.format = new Format(baseColumn.format);
             this.columns.put(columnIndex, column);
         }
-        for (Area baseArea: areas) {
+        for (Area baseArea: baseSheet.areas) {
             Area area = new Area();
             for (Range baseRange: baseArea.ranges) {
                 area.ranges.add(new Range(baseRange));
@@ -604,6 +604,11 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
                 isBetween(rowIndex, rowIndex1, rowIndex2) &&
                 isBetween(columnIndex, columnIndex1, columnIndex2)
             );
+        }
+        
+        @Override
+        public String toString() {
+            return "Range{" + rowIndex1 + ", " + columnIndex1 + ", " + rowIndex1 + ", " + columnIndex2 + ", }";
         }
 
         private boolean isBetween(int number, int bound1, int bound2) {

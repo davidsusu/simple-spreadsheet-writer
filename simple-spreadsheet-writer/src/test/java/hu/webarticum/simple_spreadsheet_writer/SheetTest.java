@@ -220,12 +220,25 @@ public class SheetTest {
             String sheetName = entry.getKey();
             Sheet sheet = entry.getValue();
             try {
-                
-                // TODO: test sheet, assert with sheetName
-                
+                assertFalse(sheet.isEmpty());
+                assertEquals(1, sheet.getMinRowIndex());
+                assertEquals(0, sheet.getMinColumnIndex());
+                assertEquals(5, sheet.getMaxRowIndex());
+                assertEquals(5, sheet.getMaxColumnIndex());
+                assertEquals(6, sheet.getWidth());
+                assertEquals(6, sheet.getDefinedWidth());
+                assertEquals(6, sheet.getHeight());
+                assertEquals(5, sheet.getDefinedHeight());
+                assertEquals("Test cell 2", sheet.getCell(1, 2).text);
+                assertEquals("#FF0000", sheet.getCellEntry(1, 2).getComputedFormat().get("background-color"));
+                assertEquals("#FFFF00", sheet.getCellEntry(3, 1).getComputedFormat().get("background-color"));
+                assertEquals("normal", sheet.getCellEntry(2, 2).getComputedFormat().get("font-weight"));
+                assertNull(sheet.getColumn(1));
+                assertNotNull(sheet.getColumn(2));
+                assertNull(sheet.getRow(0));
+                assertNotNull(sheet.getRow(1));
             } catch (Throwable e) {
-                fail(sheetName + ": unexpected exception");
-                e.printStackTrace();
+                throw new RuntimeException(sheetName + ": " + e.getMessage(), e);
             }
         }
     }
@@ -272,6 +285,7 @@ public class SheetTest {
     public void testComplexMove() {
         Sheet sheet = createComplexSheet();
 
+        assertFalse(sheet.isEmpty());
         assertEquals(1, sheet.getMinRowIndex());
         assertEquals(0, sheet.getMinColumnIndex());
         assertEquals(5, sheet.getMaxRowIndex());
@@ -284,9 +298,14 @@ public class SheetTest {
         assertEquals("#FF0000", sheet.getCellEntry(1, 2).getComputedFormat().get("background-color"));
         assertEquals("#FFFF00", sheet.getCellEntry(3, 1).getComputedFormat().get("background-color"));
         assertEquals("normal", sheet.getCellEntry(2, 2).getComputedFormat().get("font-weight"));
-
+        assertNull(sheet.getColumn(1));
+        assertNotNull(sheet.getColumn(2));
+        assertNull(sheet.getRow(0));
+        assertNotNull(sheet.getRow(1));
+        
         sheet.move(-4, -7);
         
+        assertFalse(sheet.isEmpty());
         assertEquals(-3, sheet.getMinRowIndex());
         assertEquals(-7, sheet.getMinColumnIndex());
         assertEquals(1, sheet.getMaxRowIndex());
@@ -299,11 +318,16 @@ public class SheetTest {
         assertEquals("#FF0000", sheet.getCellEntry(-3, -5).getComputedFormat().get("background-color"));
         assertEquals("#FFFF00", sheet.getCellEntry(-1, -6).getComputedFormat().get("background-color"));
         assertEquals("normal", sheet.getCellEntry(-1, -5).getComputedFormat().get("font-weight"));
-
+        assertNull(sheet.getColumn(-6));
+        assertNotNull(sheet.getColumn(-5));
+        assertNull(sheet.getRow(-4));
+        assertNotNull(sheet.getRow(-3));
+        
         int[] move = sheet.moveToNonNegative();
         assertEquals(3, move[0]);
         assertEquals(7, move[1]);
         
+        assertFalse(sheet.isEmpty());
         assertEquals(0, sheet.getMinRowIndex());
         assertEquals(0, sheet.getMinColumnIndex());
         assertEquals(4, sheet.getMaxRowIndex());
@@ -316,6 +340,10 @@ public class SheetTest {
         assertEquals("#FF0000", sheet.getCellEntry(0, 2).getComputedFormat().get("background-color"));
         assertEquals("#FFFF00", sheet.getCellEntry(2, 1).getComputedFormat().get("background-color"));
         assertEquals("normal", sheet.getCellEntry(1, 2).getComputedFormat().get("font-weight"));
+        assertNull(sheet.getColumn(1));
+        assertNotNull(sheet.getColumn(2));
+        assertNull(sheet.getRow(-1));
+        assertNotNull(sheet.getRow(0));
     }
     
     private Sheet createComplexSheet() {
