@@ -180,7 +180,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         for (Area area: areas) {
             if (!area.isEmpty()) {
                 int areaMaxRowIndex = area.getMaxRowIndex();
-                if (areaMaxRowIndex < maxRowIndex) {
+                if (areaMaxRowIndex > maxRowIndex) {
                     maxRowIndex = areaMaxRowIndex;
                 }
             }
@@ -234,7 +234,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         for (Area area: areas) {
             if (!area.isEmpty()) {
                 int areaMaxColumnIndex = area.getMaxColumnIndex();
-                if (areaMaxColumnIndex < maxColumnIndex) {
+                if (areaMaxColumnIndex > maxColumnIndex) {
                     maxColumnIndex = areaMaxColumnIndex;
                 }
             }
@@ -494,7 +494,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
             }
             rows = newRows;
         }
-        if (horizontalMove > 0) {
+        if (horizontalMove != 0) {
             TreeMap<Integer, Column> newColumns = new TreeMap<Integer, Column>();
             for (Map.Entry<Integer, Column> entry: columns.entrySet()) {
                 newColumns.put(entry.getKey() + horizontalMove, entry.getValue());
@@ -679,7 +679,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         public int getMaxRowIndex() {
             int maxRowIndex = Integer.MIN_VALUE;
             for (Range range: ranges) {
-                int rangeMaxRowIndex = Math.min(range.rowIndex1, range.rowIndex2);
+                int rangeMaxRowIndex = Math.max(range.rowIndex1, range.rowIndex2);
                 if (rangeMaxRowIndex > maxRowIndex) {
                     maxRowIndex = rangeMaxRowIndex;
                 }
@@ -701,7 +701,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         public int getMaxColumnIndex() {
             int maxColumnIndex = Integer.MIN_VALUE;
             for (Range range: ranges) {
-                int rangeMaxColumnIndex = Math.min(range.columnIndex1, range.columnIndex2);
+                int rangeMaxColumnIndex = Math.max(range.columnIndex1, range.columnIndex2);
                 if (rangeMaxColumnIndex > maxColumnIndex) {
                     maxColumnIndex = rangeMaxColumnIndex;
                 }
@@ -793,6 +793,14 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     static public class FormatList extends ArrayList<Format> {
 
         private static final long serialVersionUID = 1L;
+
+        public FormatList() {
+            super();
+        }
+
+        public FormatList(FormatList formatList) {
+            super(formatList);
+        }
         
         public Format merge() {
             Format result = new Format();
@@ -821,6 +829,14 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         public Format columnFormat;
         
         public FormatList areaFormats;
+        
+        public Format getComputedFormat() {
+            FormatList formatList = new FormatList(areaFormats);
+            formatList.add(columnFormat);
+            formatList.add(rowFormat);
+            formatList.add(cell.format);
+            return formatList.merge();
+        }
         
     }
     

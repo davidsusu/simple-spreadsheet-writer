@@ -206,38 +206,7 @@ public class SheetTest {
 
     @Test
     public void testComplexSheet() {
-        Sheet sheet1 = new Sheet();
-        
-        sheet1.write(1, 1, "Test cell 1");
-        sheet1.write(1, 2, "Test cell 2", new Sheet.Format(new String[]{
-            "font-weight", "bold",
-            "background-color", "#FF0000"
-        }));
-        
-        {
-            Sheet.Area area = new Sheet.Area(new int[]{
-                1, 2, 1, 2,
-                3, 0, 4, 5,
-            }, new Sheet.Format(new String[]{
-                "font-style", "italic",
-                "background-color", "#FFFF00",
-                "color", "#0000FF",
-            }));
-            assertFalse(area.contains(0, 1));
-            assertTrue(area.contains(1, 2));
-            assertFalse(area.contains(2, 2));
-            assertTrue(area.contains(3, 2));
-            assertTrue(area.contains(4, 5));
-            assertFalse(area.contains(5, 6));
-            sheet1.addArea(area);
-        }
-        
-        sheet1.addArea(new Sheet.Area(3, 1, 3, 2, new Sheet.Format(new String[]{
-            "color", "#CC9900",
-            "text-decoration", "underline",
-        })));
-        
-        // TODO
+        Sheet sheet1 = createComplexSheet();
         
         Sheet sheet2 = new Sheet(sheet1);
         Sheet sheet3 = new Sheet(sheet2);
@@ -251,7 +220,7 @@ public class SheetTest {
             String sheetName = entry.getKey();
             Sheet sheet = entry.getValue();
             try {
-            
+                
                 // TODO: test sheet, assert with sheetName
                 
             } catch (Throwable e) {
@@ -301,7 +270,99 @@ public class SheetTest {
 
     @Test
     public void testComplexMove() {
-        // TODO
+        Sheet sheet = createComplexSheet();
+
+        assertEquals(1, sheet.getMinRowIndex());
+        assertEquals(0, sheet.getMinColumnIndex());
+        assertEquals(5, sheet.getMaxRowIndex());
+        assertEquals(5, sheet.getMaxColumnIndex());
+        assertEquals(6, sheet.getWidth());
+        assertEquals(6, sheet.getDefinedWidth());
+        assertEquals(6, sheet.getHeight());
+        assertEquals(5, sheet.getDefinedHeight());
+        assertEquals("Test cell 2", sheet.getCell(1, 2).text);
+        assertEquals("#FF0000", sheet.getCellEntry(1, 2).getComputedFormat().get("background-color"));
+        assertEquals("#FFFF00", sheet.getCellEntry(3, 1).getComputedFormat().get("background-color"));
+        assertEquals("normal", sheet.getCellEntry(2, 2).getComputedFormat().get("font-weight"));
+
+        sheet.move(-4, -7);
+        
+        assertEquals(-3, sheet.getMinRowIndex());
+        assertEquals(-7, sheet.getMinColumnIndex());
+        assertEquals(1, sheet.getMaxRowIndex());
+        assertEquals(-2, sheet.getMaxColumnIndex());
+        assertEquals(6, sheet.getWidth());
+        assertEquals(6, sheet.getDefinedWidth());
+        assertEquals(5, sheet.getHeight());
+        assertEquals(5, sheet.getDefinedHeight());
+        assertEquals("Test cell 2", sheet.getCell(-3, -5).text);
+        assertEquals("#FF0000", sheet.getCellEntry(-3, -5).getComputedFormat().get("background-color"));
+        assertEquals("#FFFF00", sheet.getCellEntry(-1, -6).getComputedFormat().get("background-color"));
+        assertEquals("normal", sheet.getCellEntry(-1, -5).getComputedFormat().get("font-weight"));
+
+        int[] move = sheet.moveToNonNegative();
+        assertEquals(3, move[0]);
+        assertEquals(7, move[1]);
+        
+        assertEquals(0, sheet.getMinRowIndex());
+        assertEquals(0, sheet.getMinColumnIndex());
+        assertEquals(4, sheet.getMaxRowIndex());
+        assertEquals(5, sheet.getMaxColumnIndex());
+        assertEquals(6, sheet.getWidth());
+        assertEquals(6, sheet.getDefinedWidth());
+        assertEquals(5, sheet.getHeight());
+        assertEquals(5, sheet.getDefinedHeight());
+        assertEquals("Test cell 2", sheet.getCell(0, 2).text);
+        assertEquals("#FF0000", sheet.getCellEntry(0, 2).getComputedFormat().get("background-color"));
+        assertEquals("#FFFF00", sheet.getCellEntry(2, 1).getComputedFormat().get("background-color"));
+        assertEquals("normal", sheet.getCellEntry(1, 2).getComputedFormat().get("font-weight"));
+    }
+    
+    private Sheet createComplexSheet() {
+        Sheet sheet = new Sheet();
+        
+        sheet.write(1, 1, "Test cell 1");
+        sheet.write(1, 2, "Test cell 2", new Sheet.Format(new String[]{
+            "font-weight", "bold",
+            "background-color", "#FF0000"
+        }));
+
+        sheet.getColumn(2, new Sheet.Column()).format = new Sheet.Format(new String[]{
+            "font-weight", "normal"
+        });
+
+        sheet.getRow(4, new Sheet.Row()).format = new Sheet.Format(new String[]{
+            "font-style", "normal"
+        });
+
+        sheet.getRow(5, new Sheet.Row()).format = new Sheet.Format(new String[]{
+            "font-weight", "normal"
+        });
+        
+        {
+            Sheet.Area area = new Sheet.Area(new int[]{
+                1, 2, 1, 2,
+                3, 0, 4, 5,
+            }, new Sheet.Format(new String[]{
+                "font-style", "italic",
+                "background-color", "#FFFF00",
+                "color", "#0000FF",
+            }));
+            assertFalse(area.contains(0, 1));
+            assertTrue(area.contains(1, 2));
+            assertFalse(area.contains(2, 2));
+            assertTrue(area.contains(3, 2));
+            assertTrue(area.contains(4, 5));
+            assertFalse(area.contains(5, 6));
+            sheet.addArea(area);
+        }
+        
+        sheet.addArea(new Sheet.Area(3, 1, 3, 2, new Sheet.Format(new String[]{
+            "color", "#CC9900",
+            "text-decoration", "underline",
+        })));
+        
+        return sheet;
     }
     
 }
