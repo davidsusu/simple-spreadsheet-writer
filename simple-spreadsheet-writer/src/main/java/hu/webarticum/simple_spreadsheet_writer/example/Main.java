@@ -28,6 +28,8 @@ public class Main {
             System.out.println(" " + (i + 1) + ") " + examples.get(i).getLabel());
         }
         
+        int defaultNumber = 1;
+        
         int number;
         while (true) {
             System.out.print("Choose an example (1): ");
@@ -37,6 +39,10 @@ public class Main {
             } catch (IOException e1) {
                 System.out.println("Input error!");
                 continue;
+            }
+            if (line.isEmpty()) {
+                number = defaultNumber;
+                break;
             }
             try {
                 number = Integer.parseInt(line);

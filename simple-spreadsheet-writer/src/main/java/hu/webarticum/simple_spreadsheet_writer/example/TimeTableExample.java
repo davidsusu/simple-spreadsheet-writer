@@ -14,7 +14,9 @@ public class TimeTableExample implements Example {
     public Spreadsheet create() {
         Spreadsheet spreadsheet = new Spreadsheet();
         Sheet sheet = new Sheet();
-        sheet.write(0, 0, "Sample!");
+        sheet.write(0, 0, "Sample!", new Sheet.Format(new String[]{
+            "background-color", "#FF0000",
+        }));
         spreadsheet.add("Timetable", sheet);
         return spreadsheet;
     }

@@ -20,9 +20,14 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
         
         // XXX
         for (Spreadsheet.Page page: spreadsheet) {
+            Sheet sheet = page.sheet;
+            if (sheet.hasNegative()) {
+                sheet = new Sheet(sheet);
+                sheet.moveToNonNegative();
+            }
             org.apache.poi.ss.usermodel.Sheet outputSheet = outputWorkbook.createSheet(page.label);
             Integer previousRowIndex = null;
-            for (Sheet.CellEntry entry: page.sheet) {
+            for (Sheet.CellEntry entry: sheet) {
                 org.apache.poi.ss.usermodel.Row outputRow;
                 if (previousRowIndex == null || entry.rowIndex != previousRowIndex) {
                     outputRow = outputSheet.createRow(entry.rowIndex);

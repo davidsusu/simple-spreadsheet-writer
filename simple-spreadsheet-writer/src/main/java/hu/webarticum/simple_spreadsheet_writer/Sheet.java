@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.collections4.IteratorUtils;
 
@@ -311,6 +312,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
             rows.remove(rowIndex);
         }
     }
+
+    public TreeSet<Integer> getColumnIndexes() {
+        return new TreeSet<Integer>(columns.keySet());
+    }
     
     public boolean hasRow(int rowIndex) {
         return rows.containsKey(rowIndex);
@@ -355,6 +360,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
 
     public void cutRow(int rowIndex) {
         cutFromTreeMap(rows, rowIndex);
+    }
+    
+    public TreeSet<Integer> getRowIndexes() {
+        return new TreeSet<Integer>(rows.keySet());
     }
     
     public boolean hasCell(int rowIndex, int columnIndex) {
@@ -755,6 +764,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     }
 
     // XXX <String, FormatValue>?
+    // TODO: rename to Style
     static public class Format extends HashMap<String, String> {
 
         private static final long serialVersionUID = 1L;
