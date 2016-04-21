@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.poi.ss.format.CellFormat;
 import org.apache.poi.ss.format.CellFormatPart;
@@ -13,6 +15,10 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.odftoolkit.odfdom.incubator.doc.style.OdfStyle;
 import org.odftoolkit.odfdom.type.Color;
 import org.odftoolkit.simple.SpreadsheetDocument;
+import org.odftoolkit.simple.style.Font;
+import org.odftoolkit.simple.style.StyleTypeDefinitions.FontStyle;
+import org.odftoolkit.simple.style.StyleTypeDefinitions.HorizontalAlignmentType;
+import org.odftoolkit.simple.style.StyleTypeDefinitions.VerticalAlignmentType;
 import org.odftoolkit.simple.table.Table;
 
 import hu.webarticum.simple_spreadsheet_writer.Sheet.Row;
@@ -88,10 +94,73 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
             if (property.equals("background-color")) {
                 outputCell.setCellBackgroundColor(new Color(value));
             } else if (property.equals("color")) {
-                // TODO
+                Font font = getFont(outputCell);
+                font.setColor(new Color(value));
+                outputCell.setFont(font);
+            } else if (property.equals("font-style")) {
+                Font font = getFont(outputCell);
+                boolean isBold = (
+                    font.getFontStyle().equals(FontStyle.BOLD) ||
+                    font.getFontStyle().equals(FontStyle.BOLDITALIC)
+                );
+                font.setFontStyle(isBold ? FontStyle.BOLDITALIC : FontStyle.ITALIC);
+                outputCell.setFont(font);
             } else if (property.equals("font-weight")) {
-                // TODO
+                Font font = getFont(outputCell);
+                boolean isItalic = (
+                    font.getFontStyle().equals(FontStyle.ITALIC) ||
+                    font.getFontStyle().equals(FontStyle.BOLDITALIC)
+                );
+                font.setFontStyle(isItalic ? FontStyle.BOLDITALIC : FontStyle.BOLD);
+                outputCell.setFont(font);
+            } else if (property.equals("text-align")) {                
+                outputCell.setHorizontalAlignment(getHorizontalAligment(value));
+            } else if (property.equals("vertical-align")) {
+                outputCell.setVerticalAlignment(getVerticalAlignment(value));
             } // TODO
+        }
+    }
+
+    private Font getFont(org.odftoolkit.simple.table.Cell outputCell) {
+        Font font = outputCell.getFont();
+        if (font == null) {
+            font = outputCell.getStyleHandler().getFont(SpreadsheetDocument.ScriptType.WESTERN);
+        }
+        // XXX
+        if (font.getSize() == 0) {
+            font.setSize(10);
+        }
+        return font;
+    }
+    
+    private TreeMap<String, HorizontalAlignmentType> horizontalAlignmentMap = null;
+    private HorizontalAlignmentType getHorizontalAligment(String value) {
+        if (horizontalAlignmentMap == null) {
+            horizontalAlignmentMap = new TreeMap<String, HorizontalAlignmentType>();
+            horizontalAlignmentMap.put("left", HorizontalAlignmentType.LEFT);
+            horizontalAlignmentMap.put("center", HorizontalAlignmentType.CENTER);
+            horizontalAlignmentMap.put("right", HorizontalAlignmentType.RIGHT);
+            horizontalAlignmentMap.put("justify", HorizontalAlignmentType.JUSTIFY);
+        }
+        if (horizontalAlignmentMap.containsKey(value)) {
+            return horizontalAlignmentMap.get(value);
+        } else {
+            return HorizontalAlignmentType.DEFAULT;
+        }
+    }
+
+    private TreeMap<String, VerticalAlignmentType> verticalAlignmentMap = null;
+    private VerticalAlignmentType getVerticalAlignment(String value) {
+        if (verticalAlignmentMap == null) {
+            verticalAlignmentMap = new TreeMap<String, VerticalAlignmentType>();
+            verticalAlignmentMap.put("top", VerticalAlignmentType.TOP);
+            verticalAlignmentMap.put("middle", VerticalAlignmentType.MIDDLE);
+            verticalAlignmentMap.put("bottom", VerticalAlignmentType.BOTTOM);
+        }
+        if (verticalAlignmentMap.containsKey(value)) {
+            return verticalAlignmentMap.get(value);
+        } else {
+            return VerticalAlignmentType.DEFAULT;
         }
     }
     
