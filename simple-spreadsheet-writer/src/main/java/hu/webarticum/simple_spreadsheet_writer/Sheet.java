@@ -21,12 +21,13 @@ import hu.webarticum.simple_spreadsheet_writer.util.MergeSortedIterator;
 public class Sheet implements Iterable<Sheet.CellEntry> {
 
     static public final int ITERATOR_CELLS = 1;
-    static public final int ITERATOR_AREAS = 2;
+    static public final int ITERATOR_ROWS = 2;
     static public final int ITERATOR_COLUMNS = 4;
-    static public final int ITERATOR_ROWS = 8;
-    static public final int ITERATOR_COMBINED = 14;
-    static public final int ITERATOR_ALL = 16;
-    static public final int ITERATOR_FULL = 32;
+    static public final int ITERATOR_AREAS = 8;
+    static public final int ITERATOR_MERGES = 16;
+    static public final int ITERATOR_COMBINED = 30;
+    static public final int ITERATOR_ALL = 32;
+    static public final int ITERATOR_FULL = 64;
     
     private TreeMap<Integer, Row> rows = new TreeMap<Integer, Row>();
 
@@ -34,6 +35,8 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     
     private Set<Area> areas = new LinkedHashSet<Area>();
 
+    private Set<Range> merges = new LinkedHashSet<Range>();
+    
     public Sheet() {
     }
     
@@ -97,6 +100,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
                         positionIterators.add(new AreaPositionIterator(area));
                     }
                 }
+            }
+            if ((iteratorType & ITERATOR_MERGES) > 0) {
+                positionIterators.add(new MergesPositionIterator());
             }
             return new PositionCellEntryIterator(new MergeSortedIterator<int[]>(positionIterators, new PositionComparator()));
         }
@@ -311,6 +317,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         for (Integer rowIndex: rowIndexesToRemove) {
             rows.remove(rowIndex);
         }
+        // TODO: areas, merges
     }
 
     public TreeSet<Integer> getColumnIndexes() {
@@ -360,6 +367,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
 
     public void cutRow(int rowIndex) {
         cutFromTreeMap(rows, rowIndex);
+        // TODO: areas, merges
     }
     
     public TreeSet<Integer> getRowIndexes() {
@@ -455,6 +463,25 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
 
     public void removeArea(Area area) {
         areas.remove(area);
+    }
+    
+    public void addMerge(Range range) {
+        merges.add(range);
+    }
+    
+    public void removeMerge(Range range) {
+        merges.remove(range);
+    }
+
+    public void removeMerge(int rowIndex, int columnIndex) {
+        Iterator<Range> iterator = merges.iterator();
+        while (iterator.hasNext()) {
+            Range range = iterator.next();
+            if (range.contains(rowIndex, columnIndex)) {
+                iterator.remove();
+                break;
+            }
+        }
     }
     
     public CellEntry getCellEntry(int rowIndex, int columnIndex) {
@@ -627,6 +654,26 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
                 return (number>=bound2 && number<=bound1);
             } else {
                 return (number==bound1);
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return (rowIndex1 + rowIndex2 + columnIndex1 + columnIndex2) / 37;
+        }
+        
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof Range) {
+                Range otherRange = (Range)other;
+                return (
+                    this.rowIndex1 == otherRange.rowIndex1 &&
+                    this.rowIndex2 == otherRange.rowIndex2 &&
+                    this.columnIndex1 == otherRange.columnIndex1 &&
+                    this.columnIndex2 == otherRange.columnIndex2
+                );
+            } else {
+                return false;
             }
         }
 
@@ -943,6 +990,32 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         @Override
         public void remove() {
             throw new UnsupportedOperationException();
+        }
+        
+    }
+    
+    protected class MergesPositionIterator implements Iterator<int[]> {
+
+        public MergesPositionIterator() {
+            // TODO
+        }
+        
+        @Override
+        public boolean hasNext() {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public int[] next() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void remove() {
+            // TODO Auto-generated method stub
+            
         }
         
     }

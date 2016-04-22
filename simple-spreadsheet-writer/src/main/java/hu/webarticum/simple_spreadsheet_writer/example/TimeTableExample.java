@@ -13,7 +13,7 @@ public class TimeTableExample implements Example {
     @Override
     public Spreadsheet create() {
         Spreadsheet spreadsheet = new Spreadsheet();
-
+        
         Sheet.Format titleFormat = new Sheet.Format(new String[]{
             "text-align", "center",
             "vertical-align", "middle",
@@ -22,7 +22,7 @@ public class TimeTableExample implements Example {
             "font-weight", "bold",
             "font-style", "italic",
         });
-
+        
         Sheet.Format leftFormat = new Sheet.Format(new String[]{
             "text-align", "center",
             "vertical-align", "middle",
