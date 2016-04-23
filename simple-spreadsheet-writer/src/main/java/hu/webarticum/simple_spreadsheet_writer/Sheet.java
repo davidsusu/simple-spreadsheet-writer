@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -33,9 +31,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
 
     private TreeMap<Integer, Column> columns = new TreeMap<Integer, Column>();
     
-    private Set<Area> areas = new LinkedHashSet<Area>();
+    final public List<Area> areas = new ArrayList<Area>();
 
-    private Set<Range> merges = new LinkedHashSet<Range>();
+    final public List<Range> merges = new ArrayList<Range>();
     
     public Sheet() {
     }
@@ -333,17 +331,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     }
 
     public void cutColumn(int columnIndex) {
-        columns.remove(columnIndex);
-        List<Integer> rowIndexesToRemove = new ArrayList<Integer>();
+        cutFromTreeMap(columns, columnIndex);
         for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
             TreeMap<Integer, Cell> rowCells = entry.getValue().cells;
             cutFromTreeMap(rowCells, columnIndex);
-            if (rowCells.isEmpty()) {
-                rowIndexesToRemove.add(entry.getKey());
-            }
-        }
-        for (Integer rowIndex: rowIndexesToRemove) {
-            rows.remove(rowIndex);
         }
         for (Area area: areas) {
             Iterator<Range> iterator = area.ranges.iterator();
@@ -530,13 +521,17 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     public void removeCell(int rowIndex, int columnIndex) {
         setCell(rowIndex, columnIndex, null);
     }
-    
+    /*
     public void addArea(Area area) {
         areas.add(area);
     }
 
     public void removeArea(Area area) {
         areas.remove(area);
+    }
+    
+    public List<Area> getLists() {
+        return new ArrayList<Area>(areas);
     }
     
     public void addMerge(Range range) {
@@ -550,7 +545,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     public void removeMerge(Range range) {
         merges.remove(range);
     }
-
+*/
     public void removeMerge(int rowIndex, int columnIndex) {
         Iterator<Range> iterator = merges.iterator();
         while (iterator.hasNext()) {
@@ -1046,7 +1041,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    protected class PositionComparator implements Comparator<int[]> {
+    static public class PositionComparator implements Comparator<int[]> {
 
         @Override
         public int compare(int[] position1, int[] position2) {
@@ -1109,7 +1104,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
 
-    protected class AreaPositionIterator implements Iterator<int[]> {
+    static public class AreaPositionIterator implements Iterator<int[]> {
 
         private MergeSortedIterator<int[]> mergeIterator;
         
@@ -1118,7 +1113,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
             for (Range range: area.ranges) {
                 rangeIterators.add(new RangePositionIterator(range));
             }
-            mergeIterator = new MergeSortedIterator<int[]>(rangeIterators);
+            mergeIterator = new MergeSortedIterator<int[]>(rangeIterators, new PositionComparator());
         }
         
         @Override
@@ -1326,7 +1321,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    protected class RangePositionIterator implements Iterator<int[]> {
+    static public class RangePositionIterator implements Iterator<int[]> {
 
         int startRowIndex;
 
@@ -1343,8 +1338,8 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         public RangePositionIterator(Range range) {
             this.startRowIndex = Math.min(range.rowIndex1, range.rowIndex2);
             this.endRowIndex = Math.max(range.rowIndex1, range.rowIndex2);
-            this.startColumnIndex = Math.min(range.columnIndex1, range.rowIndex2);
-            this.endColumnIndex = Math.max(range.columnIndex1, range.rowIndex2);
+            this.startColumnIndex = Math.min(range.columnIndex1, range.columnIndex2);
+            this.endColumnIndex = Math.max(range.columnIndex1, range.columnIndex2);
         }
 
         @Override
@@ -1352,7 +1347,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
             if (currentRowIndex == null) {
                 return true;
             }
-            return (currentRowIndex < endRowIndex && currentColumnIndex < endColumnIndex);
+            return (
+                currentRowIndex < endRowIndex ||
+                (currentRowIndex == endRowIndex && currentColumnIndex < endColumnIndex)
+            );
         }
 
         @Override
@@ -1361,14 +1359,14 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
                 currentRowIndex = startRowIndex;
                 currentColumnIndex = startColumnIndex;
                 return new int[]{currentRowIndex, currentColumnIndex};
-            } else if (currentRowIndex >= endRowIndex) {
+            } else if (currentRowIndex > endRowIndex) {
                 throw new NoSuchElementException();
             } else {
                 currentColumnIndex++;
                 if (currentColumnIndex > endColumnIndex) {
                     currentColumnIndex = startColumnIndex;
                     currentRowIndex ++;
-                    if (currentRowIndex >= endRowIndex) {
+                    if (currentRowIndex > endRowIndex) {
                         throw new NoSuchElementException();
                     }
                 }

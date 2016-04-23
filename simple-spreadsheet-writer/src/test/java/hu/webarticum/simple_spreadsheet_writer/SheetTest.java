@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -206,40 +207,48 @@ public class SheetTest {
 
     @Test
     public void testComplexSheet() {
-        Sheet sheet1 = createComplexSheet();
+        Sheet baseSheet = createComplexSheet();
         
-        Sheet sheet2 = new Sheet(sheet1);
-        Sheet sheet3 = new Sheet(sheet2);
+        {
+            Sheet sheet = baseSheet;
+            assertFalse(sheet.isEmpty());
+            assertEquals(1, sheet.getMinRowIndex());
+            assertEquals(0, sheet.getMinColumnIndex());
+            assertEquals(5, sheet.getMaxRowIndex());
+            assertEquals(5, sheet.getMaxColumnIndex());
+            assertEquals(6, sheet.getWidth());
+            assertEquals(6, sheet.getDefinedWidth());
+            assertEquals(6, sheet.getHeight());
+            assertEquals(5, sheet.getDefinedHeight());
+            assertEquals("Test cell 2", sheet.getCell(1, 2).text);
+            assertEquals("#FF0000", sheet.getCellEntry(1, 2).getComputedFormat().get("background-color"));
+            assertEquals("#FFFF00", sheet.getCellEntry(3, 1).getComputedFormat().get("background-color"));
+            assertEquals("normal", sheet.getCellEntry(2, 2).getComputedFormat().get("font-weight"));
+            assertNull(sheet.getColumn(1));
+            assertNotNull(sheet.getColumn(2));
+            assertNull(sheet.getRow(0));
+            assertNotNull(sheet.getRow(1));
+        }
         
-        Map<String, Sheet> sheetMap = new LinkedHashMap<String, Sheet>();
-        sheetMap.put("Sheet.1", sheet1);
-        sheetMap.put("Sheet.2", sheet2);
-        sheetMap.put("Sheet.3", sheet3);
-        
-        for (Map.Entry<String, Sheet> entry: sheetMap.entrySet()) {
-            String sheetName = entry.getKey();
-            Sheet sheet = entry.getValue();
-            try {
-                assertFalse(sheet.isEmpty());
-                assertEquals(1, sheet.getMinRowIndex());
-                assertEquals(0, sheet.getMinColumnIndex());
-                assertEquals(5, sheet.getMaxRowIndex());
-                assertEquals(5, sheet.getMaxColumnIndex());
-                assertEquals(6, sheet.getWidth());
-                assertEquals(6, sheet.getDefinedWidth());
-                assertEquals(6, sheet.getHeight());
-                assertEquals(5, sheet.getDefinedHeight());
-                assertEquals("Test cell 2", sheet.getCell(1, 2).text);
-                assertEquals("#FF0000", sheet.getCellEntry(1, 2).getComputedFormat().get("background-color"));
-                assertEquals("#FFFF00", sheet.getCellEntry(3, 1).getComputedFormat().get("background-color"));
-                assertEquals("normal", sheet.getCellEntry(2, 2).getComputedFormat().get("font-weight"));
-                assertNull(sheet.getColumn(1));
-                assertNotNull(sheet.getColumn(2));
-                assertNull(sheet.getRow(0));
-                assertNotNull(sheet.getRow(1));
-            } catch (Throwable e) {
-                throw new RuntimeException(sheetName + ": " + e.getMessage(), e);
-            }
+        {
+            Sheet sheet = new Sheet(baseSheet);
+            assertFalse(sheet.isEmpty());
+            assertEquals(1, sheet.getMinRowIndex());
+            assertEquals(0, sheet.getMinColumnIndex());
+            assertEquals(5, sheet.getMaxRowIndex());
+            assertEquals(5, sheet.getMaxColumnIndex());
+            assertEquals(6, sheet.getWidth());
+            assertEquals(6, sheet.getDefinedWidth());
+            assertEquals(6, sheet.getHeight());
+            assertEquals(5, sheet.getDefinedHeight());
+            assertEquals("Test cell 2", sheet.getCell(1, 2).text);
+            assertEquals("#FF0000", sheet.getCellEntry(1, 2).getComputedFormat().get("background-color"));
+            assertEquals("#FFFF00", sheet.getCellEntry(3, 1).getComputedFormat().get("background-color"));
+            assertEquals("normal", sheet.getCellEntry(2, 2).getComputedFormat().get("font-weight"));
+            assertNull(sheet.getColumn(1));
+            assertNotNull(sheet.getColumn(2));
+            assertNull(sheet.getRow(0));
+            assertNotNull(sheet.getRow(1));
         }
     }
 
@@ -349,8 +358,110 @@ public class SheetTest {
     @Test
     public void testComplexCutAndInsert() {
         Sheet sheet = createComplexSheet();
+
+        assertFalse(sheet.isEmpty());
+        assertEquals(1, sheet.getMinRowIndex());
+        assertEquals(0, sheet.getMinColumnIndex());
+        assertEquals(5, sheet.getMaxRowIndex());
+        assertEquals(5, sheet.getMaxColumnIndex());
+        assertEquals(6, sheet.getWidth());
+        assertEquals(6, sheet.getDefinedWidth());
+        assertEquals(6, sheet.getHeight());
+        assertEquals(5, sheet.getDefinedHeight());
+        assertNull(sheet.getColumn(1));
+        assertNotNull(sheet.getColumn(2));
+        assertNull(sheet.getRow(0));
+        assertNotNull(sheet.getRow(1));
+        assertNull(sheet.getRow(3));
+        assertNotNull(sheet.getRow(4));
+        assertNotNull(sheet.getRow(5));
+        {
+            Sheet.Area area = sheet.areas.get(0);
+            assertEquals(2, area.ranges.size());
+            assertEquals(13, IteratorUtils.toList(new Sheet.AreaPositionIterator(area)).size());
+        }
+        {
+            Sheet.Area area = sheet.areas.get(1);
+            assertEquals(1, area.ranges.size());
+            assertEquals(2, IteratorUtils.toList(new Sheet.AreaPositionIterator(area)).size());
+        }
+        {
+            assertEquals(1, sheet.merges.size());
+            Sheet.Range mergeRange = sheet.merges.get(0);
+            assertEquals(1, mergeRange.rowIndex1);
+            assertEquals(1, mergeRange.columnIndex1);
+            assertEquals(2, mergeRange.rowIndex2);
+            assertEquals(1, mergeRange.columnIndex2);
+        }
         
-        // TODO
+        sheet.cutRow(2);
+
+        assertFalse(sheet.isEmpty());
+        assertEquals(1, sheet.getMinRowIndex());
+        assertEquals(0, sheet.getMinColumnIndex());
+        assertEquals(4, sheet.getMaxRowIndex());
+        assertEquals(5, sheet.getMaxColumnIndex());
+        assertEquals(6, sheet.getWidth());
+        assertEquals(6, sheet.getDefinedWidth());
+        assertEquals(5, sheet.getHeight());
+        assertEquals(4, sheet.getDefinedHeight());
+        assertNull(sheet.getColumn(1));
+        assertNotNull(sheet.getColumn(2));
+        assertNull(sheet.getRow(0));
+        assertNotNull(sheet.getRow(1));
+        assertNotNull(sheet.getRow(3));
+        assertNotNull(sheet.getRow(4));
+        assertNull(sheet.getRow(5));
+        {
+            Sheet.Area area = sheet.areas.get(0);
+            assertEquals(2, area.ranges.size());
+            assertEquals(13, IteratorUtils.toList(new Sheet.AreaPositionIterator(area)).size());
+        }
+        {
+            Sheet.Area area = sheet.areas.get(1);
+            assertEquals(1, area.ranges.size());
+            assertEquals(2, IteratorUtils.toList(new Sheet.AreaPositionIterator(area)).size());
+        }
+        {
+            assertEquals(1, sheet.merges.size());
+            Sheet.Range mergeRange = sheet.merges.get(0);
+            assertEquals(1, mergeRange.rowIndex1);
+            assertEquals(1, mergeRange.columnIndex1);
+            assertEquals(1, mergeRange.rowIndex2);
+            assertEquals(1, mergeRange.columnIndex2);
+        }
+
+        sheet.cutColumn(1);
+
+        assertFalse(sheet.isEmpty());
+        assertEquals(1, sheet.getMinRowIndex());
+        assertEquals(0, sheet.getMinColumnIndex());
+        assertEquals(4, sheet.getMaxRowIndex());
+        assertEquals(4, sheet.getMaxColumnIndex());
+        assertEquals(5, sheet.getWidth());
+        assertEquals(5, sheet.getDefinedWidth());
+        assertEquals(5, sheet.getHeight());
+        assertEquals(4, sheet.getDefinedHeight());
+        assertNotNull(sheet.getColumn(1));
+        assertNull(sheet.getColumn(2));
+        assertNull(sheet.getRow(0));
+        assertNotNull(sheet.getRow(1));
+        assertNotNull(sheet.getRow(3));
+        assertNotNull(sheet.getRow(4));
+        assertNull(sheet.getRow(5));
+        {
+            Sheet.Area area = sheet.areas.get(0);
+            assertEquals(2, area.ranges.size());
+            assertEquals(11, IteratorUtils.toList(new Sheet.AreaPositionIterator(area)).size());
+        }
+        {
+            Sheet.Area area = sheet.areas.get(1);
+            assertEquals(1, area.ranges.size());
+            assertEquals(1, IteratorUtils.toList(new Sheet.AreaPositionIterator(area)).size());
+        }
+        {
+            assertEquals(0, sheet.merges.size());
+        }
     }
     
     private Sheet createComplexSheet() {
@@ -389,15 +500,15 @@ public class SheetTest {
             assertTrue(area.contains(3, 2));
             assertTrue(area.contains(4, 5));
             assertFalse(area.contains(5, 6));
-            sheet.addArea(area);
+            sheet.areas.add(area);
         }
         
-        sheet.addArea(new Sheet.Area(3, 1, 3, 2, new Sheet.Format(new String[]{
+        sheet.areas.add(new Sheet.Area(3, 1, 3, 2, new Sheet.Format(new String[]{
             "color", "#CC9900",
             "text-decoration", "underline",
         })));
         
-        sheet.addMerge(1, 1, 2, 1);
+        sheet.merges.add(new Sheet.Range(1, 1, 2, 1));
         
         return sheet;
     }
