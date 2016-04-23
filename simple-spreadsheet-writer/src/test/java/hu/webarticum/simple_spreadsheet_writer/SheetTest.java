@@ -345,6 +345,13 @@ public class SheetTest {
         assertNull(sheet.getRow(-1));
         assertNotNull(sheet.getRow(0));
     }
+
+    @Test
+    public void testComplexCutAndInsert() {
+        Sheet sheet = createComplexSheet();
+        
+        // TODO
+    }
     
     private Sheet createComplexSheet() {
         Sheet sheet = new Sheet();
@@ -389,6 +396,8 @@ public class SheetTest {
             "color", "#CC9900",
             "text-decoration", "underline",
         })));
+        
+        sheet.addMerge(1, 1, 2, 1);
         
         return sheet;
     }

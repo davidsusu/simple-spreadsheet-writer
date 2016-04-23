@@ -24,8 +24,8 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     static public final int ITERATOR_ROWS = 2;
     static public final int ITERATOR_COLUMNS = 4;
     static public final int ITERATOR_AREAS = 8;
+    static public final int ITERATOR_COMBINED = 14;
     static public final int ITERATOR_MERGES = 16;
-    static public final int ITERATOR_COMBINED = 30;
     static public final int ITERATOR_ALL = 32;
     static public final int ITERATOR_FULL = 64;
     
@@ -120,6 +120,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
                 return false;
             }
         }
+        if (!merges.isEmpty()) {
+            return false;
+        }
         return true;
     }
 
@@ -174,6 +177,12 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
                 }
             }
         }
+        for (Range range: merges) {
+            int mergeMinRowIndex = Math.min(range.rowIndex1, range.rowIndex2);
+            if (mergeMinRowIndex < minRowIndex) {
+                minRowIndex = mergeMinRowIndex;
+            }
+        }
         return minRowIndex;
     }
 
@@ -190,6 +199,12 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
                 if (areaMaxRowIndex > maxRowIndex) {
                     maxRowIndex = areaMaxRowIndex;
                 }
+            }
+        }
+        for (Range range: merges) {
+            int mergeMaxRowIndex = Math.max(range.rowIndex1, range.rowIndex2);
+            if (mergeMaxRowIndex > maxRowIndex) {
+                maxRowIndex = mergeMaxRowIndex;
             }
         }
         return maxRowIndex;
@@ -287,17 +302,30 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     }
 
     public void insertColumn(int columnIndex) {
-        for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
-            insertIntoTreeMap(entry.getValue().cells, columnIndex);
-        }
-        insertIntoTreeMap(columns, columnIndex);
+        insertColumn(columnIndex, null);
     }
     
     public void insertColumn(int columnIndex, Column column) {
+        if (column == null) {
+            insertIntoTreeMap(columns, columnIndex);
+        } else {
+            insertIntoTreeMap(columns, columnIndex, column);
+        }
         for (Map.Entry<Integer, Row> entry: rows.entrySet()) {
             insertIntoTreeMap(entry.getValue().cells, columnIndex);
         }
-        insertIntoTreeMap(columns, columnIndex, column);
+        for (Area area: areas) {
+            Iterator<Range> iterator = area.ranges.iterator();
+            while (iterator.hasNext()) {
+                Range range = iterator.next();
+                insertColumnToRange(range, columnIndex);
+            }
+        }
+        Iterator<Range> iterator = merges.iterator();
+        while (iterator.hasNext()) {
+            Range range = iterator.next();
+            insertColumnToRange(range, columnIndex);
+        }
     }
     
     public void removeColumn(int columnIndex) {
@@ -317,7 +345,22 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         for (Integer rowIndex: rowIndexesToRemove) {
             rows.remove(rowIndex);
         }
-        // TODO: areas, merges
+        for (Area area: areas) {
+            Iterator<Range> iterator = area.ranges.iterator();
+            while (iterator.hasNext()) {
+                Range range = iterator.next();
+                if (cutColumnFromRange(range, columnIndex)) {
+                    iterator.remove();
+                }
+            }
+        }
+        Iterator<Range> iterator = merges.iterator();
+        while (iterator.hasNext()) {
+            Range range = iterator.next();
+            if (cutColumnFromRange(range, columnIndex)) {
+                iterator.remove();
+            }
+        }
     }
 
     public TreeSet<Integer> getColumnIndexes() {
@@ -354,11 +397,27 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     }
 
     public void insertRow(int rowIndex) {
-        insertIntoTreeMap(rows, rowIndex);
+        insertRow(rowIndex, null);
     }
     
     public void insertRow(int rowIndex, Row row) {
-        insertIntoTreeMap(rows, rowIndex, row);
+        if (row == null) {
+            insertIntoTreeMap(rows, rowIndex);
+        } else {
+            insertIntoTreeMap(rows, rowIndex, row);
+        }
+        for (Area area: areas) {
+            Iterator<Range> iterator = area.ranges.iterator();
+            while (iterator.hasNext()) {
+                Range range = iterator.next();
+                insertRowToRange(range, rowIndex);
+            }
+        }
+        Iterator<Range> iterator = merges.iterator();
+        while (iterator.hasNext()) {
+            Range range = iterator.next();
+            insertRowToRange(range, rowIndex);
+        }
     }
     
     public void removeRow(int rowIndex) {
@@ -367,7 +426,22 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
 
     public void cutRow(int rowIndex) {
         cutFromTreeMap(rows, rowIndex);
-        // TODO: areas, merges
+        for (Area area: areas) {
+            Iterator<Range> iterator = area.ranges.iterator();
+            while (iterator.hasNext()) {
+                Range range = iterator.next();
+                if (cutRowFromRange(range, rowIndex)) {
+                    iterator.remove();
+                }
+            }
+        }
+        Iterator<Range> iterator = merges.iterator();
+        while (iterator.hasNext()) {
+            Range range = iterator.next();
+            if (cutRowFromRange(range, rowIndex)) {
+                iterator.remove();
+            }
+        }
     }
     
     public TreeSet<Integer> getRowIndexes() {
@@ -468,6 +542,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     public void addMerge(Range range) {
         merges.add(range);
     }
+
+    public void addMerge(int rowIndex1, int columnIndex1, int rowIndex2, int columnIndex2) {
+        merges.add(new Range(rowIndex1, columnIndex1, rowIndex2, columnIndex2));
+    }
     
     public void removeMerge(Range range) {
         merges.remove(range);
@@ -553,6 +631,12 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
                 range.columnIndex2 += horizontalMove;
             }
         }
+        for (Range range: merges) {
+            range.rowIndex1 += verticalMove;
+            range.columnIndex1 += horizontalMove;
+            range.rowIndex2 += verticalMove;
+            range.columnIndex2 += horizontalMove;
+        }
     }
     
     public int[] moveToNonNegative() {
@@ -595,7 +679,67 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         insertIntoTreeMap(map, index);
         map.put(index, item);
     }
-    
+
+    private boolean cutColumnFromRange(Range range, int columnIndex) {
+        if (range.columnIndex1 == range.columnIndex2) {
+            return (range.columnIndex1 == columnIndex);
+        }
+        boolean inverted = (range.columnIndex1 > range.columnIndex2);
+        int min = Math.min(range.columnIndex1, range.columnIndex2);
+        int max = Math.max(range.columnIndex1, range.columnIndex2);
+        if (columnIndex >= min && columnIndex <= max) {
+            if (inverted) {
+                range.columnIndex1--;
+            } else {
+                range.columnIndex2--;
+            }
+        }
+        return false;
+    }
+
+    private void insertColumnToRange(Range range, int columnIndex) {
+        boolean inverted = (range.columnIndex1 > range.columnIndex2);
+        int min = Math.min(range.columnIndex1, range.columnIndex2);
+        int max = Math.max(range.columnIndex1, range.columnIndex2);
+        if (columnIndex > min && columnIndex <= max) {
+            if (inverted) {
+                range.columnIndex1++;
+            } else {
+                range.columnIndex2++;
+            }
+        }
+    }
+
+    private boolean cutRowFromRange(Range range, int rowIndex) {
+        if (range.rowIndex1 == range.rowIndex2) {
+            return (range.rowIndex1 == rowIndex);
+        }
+        boolean inverted = (range.rowIndex1 > range.rowIndex2);
+        int min = Math.min(range.rowIndex1, range.rowIndex2);
+        int max = Math.max(range.rowIndex1, range.rowIndex2);
+        if (rowIndex >= min && rowIndex <= max) {
+            if (inverted) {
+                range.rowIndex1--;
+            } else {
+                range.rowIndex2--;
+            }
+        }
+        return false;
+    }
+
+    private void insertRowToRange(Range range, int rowIndex) {
+        boolean inverted = (range.rowIndex1 > range.rowIndex2);
+        int min = Math.min(range.rowIndex1, range.rowIndex2);
+        int max = Math.max(range.rowIndex1, range.rowIndex2);
+        if (rowIndex > min && rowIndex <= max) {
+            if (inverted) {
+                range.rowIndex1++;
+            } else {
+                range.rowIndex2++;
+            }
+        }
+    }
+
     static public class Row {
 
         public int height = 0;
@@ -996,26 +1140,26 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     
     protected class MergesPositionIterator implements Iterator<int[]> {
 
+        Iterator<Range> rangeIterator;
+        
         public MergesPositionIterator() {
-            // TODO
+            rangeIterator = merges.iterator();
         }
         
         @Override
         public boolean hasNext() {
-            // TODO Auto-generated method stub
-            return false;
+            return rangeIterator.hasNext();
         }
 
         @Override
         public int[] next() {
-            // TODO Auto-generated method stub
-            return null;
+            Range range = rangeIterator.next();
+            return new int[]{range.rowIndex1, range.columnIndex1};
         }
 
         @Override
         public void remove() {
-            // TODO Auto-generated method stub
-            
+            throw new UnsupportedOperationException();
         }
         
     }
