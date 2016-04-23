@@ -15,9 +15,12 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.odftoolkit.odfdom.incubator.doc.style.OdfStyle;
 import org.odftoolkit.odfdom.type.Color;
 import org.odftoolkit.simple.SpreadsheetDocument;
+import org.odftoolkit.simple.style.Border;
 import org.odftoolkit.simple.style.Font;
+import org.odftoolkit.simple.style.StyleTypeDefinitions.CellBordersType;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.FontStyle;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.HorizontalAlignmentType;
+import org.odftoolkit.simple.style.StyleTypeDefinitions.SupportedLinearMeasure;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.VerticalAlignmentType;
 import org.odftoolkit.simple.table.Table;
 
@@ -78,6 +81,12 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
                 Sheet.Format computedFormat = cellEntry.getComputedFormat();
                 applyFormat(outputCell, computedFormat);
             }
+            for (Sheet.Range mergeRange: sheet.merges) {
+                outputTable.getCellRangeByPosition(
+                    mergeRange.columnIndex1, mergeRange.rowIndex1,
+                    mergeRange.columnIndex2, mergeRange.rowIndex2
+                ).merge();
+            }
         }
         
         try {
@@ -117,6 +126,14 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
                 outputCell.setHorizontalAlignment(getHorizontalAligment(value));
             } else if (property.equals("vertical-align")) {
                 outputCell.setVerticalAlignment(getVerticalAlignment(value));
+            } else if (property.equals("border-top")) {
+                outputCell.setBorders(CellBordersType.TOP, getBorder(value));
+            } else if (property.equals("border-right")) {
+                outputCell.setBorders(CellBordersType.RIGHT, getBorder(value));
+            } else if (property.equals("border-bottom")) {
+                outputCell.setBorders(CellBordersType.BOTTOM, getBorder(value));
+            } else if (property.equals("border-left")) {
+                outputCell.setBorders(CellBordersType.LEFT, getBorder(value));
             } // TODO
         }
     }
@@ -162,6 +179,14 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         } else {
             return VerticalAlignmentType.DEFAULT;
         }
+    }
+
+    private Border getBorder(String value) {
+        String[] tokens = value.split(" ");
+        int size = Integer.parseInt(tokens[0].replaceAll("pt$", ""));
+        Color color = new Color(tokens[2]);
+        SupportedLinearMeasure measure = SupportedLinearMeasure.PT;
+        return new Border(color, size, measure);
     }
     
 }
