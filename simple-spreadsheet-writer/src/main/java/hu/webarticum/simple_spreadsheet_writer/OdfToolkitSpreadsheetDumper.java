@@ -24,7 +24,7 @@ import hu.webarticum.simple_spreadsheet_writer.Sheet.Row;
 
 public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
 
-    static final int DEFAULT_FONTSIZE = 10;
+    static protected final int DEFAULT_FONTSIZE = 10;
     
     @Override
     public String getDefaultExtension() {

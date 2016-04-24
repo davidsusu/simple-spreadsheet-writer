@@ -16,10 +16,10 @@ import hu.webarticum.simple_spreadsheet_writer.Sheet.Row;
 
 abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
 
-    static final float MM_PTS = 2.834645669291f;
+    static protected final float MM_PTS = 2.834645669291f;
 
     // XXX
-    static final int MM_WUS = 100;
+    static protected final int MM_WUS = 100;
     
     @Override
     public void dump(Spreadsheet spreadheet, File file) throws IOException {

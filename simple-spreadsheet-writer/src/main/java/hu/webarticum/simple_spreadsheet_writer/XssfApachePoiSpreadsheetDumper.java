@@ -13,7 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
 
     // XXX
-    static final protected int DEFAULT_FONTSIZE = 9;
+    static protected final int DEFAULT_FONTSIZE = 9;
     
     @Override
     public String getDefaultExtension() {
