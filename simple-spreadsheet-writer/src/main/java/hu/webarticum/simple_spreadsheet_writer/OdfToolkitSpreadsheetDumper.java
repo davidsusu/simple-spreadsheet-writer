@@ -94,7 +94,7 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         }
     }
     
-    private void applyFormat(org.odftoolkit.simple.table.Cell outputCell, Sheet.Format format) {
+    protected void applyFormat(org.odftoolkit.simple.table.Cell outputCell, Sheet.Format format) {
         for (Map.Entry<String, String> entry: format.entrySet()) {
             String property = entry.getKey();
             String value = entry.getValue();
@@ -148,7 +148,7 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         }
     }
 
-    private Font getFont(org.odftoolkit.simple.table.Cell outputCell) {
+    protected Font getFont(org.odftoolkit.simple.table.Cell outputCell) {
         Font font = outputCell.getFont();
         if (font == null) {
             font = outputCell.getStyleHandler().getFont(SpreadsheetDocument.ScriptType.WESTERN);
@@ -160,8 +160,8 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         return font;
     }
     
-    private TreeMap<String, HorizontalAlignmentType> horizontalAlignmentMap = null;
-    private HorizontalAlignmentType getHorizontalAligment(String value) {
+    protected TreeMap<String, HorizontalAlignmentType> horizontalAlignmentMap = null;
+    protected HorizontalAlignmentType getHorizontalAligment(String value) {
         if (horizontalAlignmentMap == null) {
             horizontalAlignmentMap = new TreeMap<String, HorizontalAlignmentType>();
             horizontalAlignmentMap.put("left", HorizontalAlignmentType.LEFT);
@@ -176,8 +176,8 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         }
     }
 
-    private TreeMap<String, VerticalAlignmentType> verticalAlignmentMap = null;
-    private VerticalAlignmentType getVerticalAlignment(String value) {
+    protected TreeMap<String, VerticalAlignmentType> verticalAlignmentMap = null;
+    protected VerticalAlignmentType getVerticalAlignment(String value) {
         if (verticalAlignmentMap == null) {
             verticalAlignmentMap = new TreeMap<String, VerticalAlignmentType>();
             verticalAlignmentMap.put("top", VerticalAlignmentType.TOP);
@@ -191,7 +191,7 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         }
     }
 
-    private Border getBorder(String value) {
+    protected Border getBorder(String value) {
         String[] tokens = value.split(" ");
         double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
         Color color = new Color(tokens[2]);
