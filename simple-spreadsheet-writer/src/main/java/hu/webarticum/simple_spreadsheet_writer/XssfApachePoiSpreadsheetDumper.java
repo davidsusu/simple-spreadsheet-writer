@@ -10,6 +10,8 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import hu.webarticum.simple_spreadsheet_writer.util.ColorUtil;
+
 public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
 
     // XXX
@@ -99,15 +101,8 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
     }
     
     private XSSFColor getColor(String value) {
-        int red = 0; // XXX
-        int green = 0;
-        int blue = 0;
-        if (value.matches("#[a-fA-F0-9]{6}")) {
-            red = Integer.parseInt(value.substring(1, 3), 16);
-            green = Integer.parseInt(value.substring(3, 5), 16);
-            blue = Integer.parseInt(value.substring(5, 7), 16);
-        }
-        java.awt.Color awtColor = new java.awt.Color(red, green, blue);
+        int[] parts = ColorUtil.parseColor(value);
+        java.awt.Color awtColor = new java.awt.Color(parts[0], parts[1], parts[2]);
         return new XSSFColor(awtColor);
     }
     

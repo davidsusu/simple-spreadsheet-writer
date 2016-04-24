@@ -21,6 +21,7 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions.VerticalAlignmentType;
 import org.odftoolkit.simple.table.Table;
 
 import hu.webarticum.simple_spreadsheet_writer.Sheet.Row;
+import hu.webarticum.simple_spreadsheet_writer.util.ColorUtil;
 
 public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
 
@@ -99,10 +100,10 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
             String property = entry.getKey();
             String value = entry.getValue();
             if (property.equals("background-color")) {
-                outputCell.setCellBackgroundColor(new Color(value));
+                outputCell.setCellBackgroundColor(getColor(value));
             } else if (property.equals("color")) {
                 Font font = getFont(outputCell);
-                font.setColor(new Color(value));
+                font.setColor(getColor(value));
                 outputCell.setFont(font);
             } else if (property.equals("font-style")) {
                 Font font = getFont(outputCell);
@@ -194,7 +195,7 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
     protected Border getBorder(String value) {
         String[] tokens = value.split(" ");
         double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
-        Color color = new Color(tokens[2]);
+        Color color = getColor(tokens[2]);
         SupportedLinearMeasure measure = SupportedLinearMeasure.PT;
         LineStyle lineStyle = LineStyle.SOLID;
         if (tokens[1].equals("dotted")) {
@@ -205,6 +206,11 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         Border border = new Border(color, size, measure);
         // lineStyle???
         return border;
+    }
+    
+    protected Color getColor(String value) {
+        int[] parts = ColorUtil.parseColor(value);
+        return new Color(parts[0], parts[1], parts[2]);
     }
     
 }
