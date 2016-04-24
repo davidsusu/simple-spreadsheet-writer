@@ -24,8 +24,16 @@ public class TimeTableExample implements Example {
             "border-right", "1pt solid #333333",
             "border-bottom", "1pt solid #333333",
             "border-left", "1pt solid #333333",
+            "font-size", "15pt",
         });
-        
+
+        Sheet.Format cornerFormat = new Sheet.Format(new String[]{
+            "border-top", "0.5pt solid #333333",
+            "border-right", "0.5pt solid #333333",
+            "border-bottom", "0.5pt solid #333333",
+            "border-left", "0.5pt solid #333333",
+        });
+
         Sheet.Format titleFormat = new Sheet.Format(new String[]{
             "text-align", "center",
             "vertical-align", "middle",
@@ -33,6 +41,11 @@ public class TimeTableExample implements Example {
             "color", "#FFFFFF",
             "font-weight", "bold",
             "font-style", "italic",
+            "font-size", "110%",
+            "border-top", "0.5pt solid #333333",
+            "border-right", "0.5pt solid #333333",
+            "border-bottom", "0.5pt solid #333333",
+            "border-left", "0.5pt solid #333333",
         });
         
         Sheet.Format leftFormat = new Sheet.Format(new String[]{
@@ -40,11 +53,20 @@ public class TimeTableExample implements Example {
             "vertical-align", "middle",
             "background-color", "#CCCCCC",
             "font-weight", "bold",
+            "font-size", "110%",
+            "border-top", "0.5pt solid #333333",
+            "border-right", "0.5pt solid #333333",
+            "border-bottom", "0.5pt solid #333333",
+            "border-left", "0.5pt solid #333333",
         });
         
         Sheet.Format basicFormat = new Sheet.Format(new String[]{
             "text-align", "center",
             "vertical-align", "middle",
+            "border-top", "0.5pt solid #333333",
+            "border-right", "0.5pt solid #333333",
+            "border-bottom", "0.5pt solid #333333",
+            "border-left", "0.5pt solid #333333",
         });
 
         Sheet sheet = spreadsheet.add("Timetable");
@@ -55,6 +77,8 @@ public class TimeTableExample implements Example {
         
         sheet.write(0, 0, "Sample timetable", mainTitleFormat);
         sheet.merges.add(new Sheet.Range(0, 0, 0, 5));
+        
+        sheet.write(1,  0, "", cornerFormat);
         
         sheet.write(2, 0, "1", leftFormat);
         sheet.write(3, 0, "2", leftFormat);

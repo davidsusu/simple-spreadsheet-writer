@@ -7,12 +7,7 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
-import org.apache.poi.ss.format.CellFormat;
-import org.apache.poi.ss.format.CellFormatPart;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.odftoolkit.odfdom.incubator.doc.style.OdfStyle;
 import org.odftoolkit.odfdom.type.Color;
 import org.odftoolkit.simple.SpreadsheetDocument;
 import org.odftoolkit.simple.style.Border;
@@ -20,6 +15,7 @@ import org.odftoolkit.simple.style.Font;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.CellBordersType;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.FontStyle;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.HorizontalAlignmentType;
+import org.odftoolkit.simple.style.StyleTypeDefinitions.LineStyle;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.SupportedLinearMeasure;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.VerticalAlignmentType;
 import org.odftoolkit.simple.table.Table;
@@ -28,6 +24,8 @@ import hu.webarticum.simple_spreadsheet_writer.Sheet.Row;
 
 public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
 
+    static final int DEFAULT_FONTSIZE = 10;
+    
     @Override
     public String getDefaultExtension() {
         return "ods";
@@ -134,6 +132,18 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
                 outputCell.setBorders(CellBordersType.BOTTOM, getBorder(value));
             } else if (property.equals("border-left")) {
                 outputCell.setBorders(CellBordersType.LEFT, getBorder(value));
+            } else if (property.equals("font-size")) {
+                Font font = getFont(outputCell);
+                double size;
+                if (value.endsWith("pt")) {
+                    size = Double.parseDouble(value.replaceAll("pt$", ""));
+                } else if (value.endsWith("%")) {
+                    size = DEFAULT_FONTSIZE * Double.parseDouble(value.replaceAll("%$", "")) / 100;
+                } else {
+                    size = DEFAULT_FONTSIZE;
+                }
+                font.setSize(size);
+                outputCell.setFont(font);
             } // TODO
         }
     }
@@ -145,7 +155,7 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         }
         // XXX
         if (font.getSize() == 0) {
-            font.setSize(10);
+            font.setSize(DEFAULT_FONTSIZE);
         }
         return font;
     }
@@ -183,10 +193,18 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
 
     private Border getBorder(String value) {
         String[] tokens = value.split(" ");
-        int size = Integer.parseInt(tokens[0].replaceAll("pt$", ""));
+        double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
         Color color = new Color(tokens[2]);
         SupportedLinearMeasure measure = SupportedLinearMeasure.PT;
-        return new Border(color, size, measure);
+        LineStyle lineStyle = LineStyle.SOLID;
+        if (tokens[1].equals("dotted")) {
+            lineStyle = LineStyle.DOTTED;
+        } else if (tokens[1].equals("dashed")) {
+            lineStyle = LineStyle.DASH;
+        }
+        Border border = new Border(color, size, measure);
+        // lineStyle???
+        return border;
     }
     
 }
