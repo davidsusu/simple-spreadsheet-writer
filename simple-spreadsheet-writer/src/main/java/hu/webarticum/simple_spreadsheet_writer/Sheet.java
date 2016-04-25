@@ -521,38 +521,43 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     public void removeCell(int rowIndex, int columnIndex) {
         setCell(rowIndex, columnIndex, null);
     }
-    /*
-    public void addArea(Area area) {
-        areas.add(area);
-    }
 
-    public void removeArea(Area area) {
-        areas.remove(area);
+    public Range getMerge(int rowIndex, int columnIndex) {
+        Iterator<Range> iterator = merges.iterator();
+        while (iterator.hasNext()) {
+            Range range = iterator.next();
+            if (
+                rowIndex == Math.min(range.rowIndex1, range.rowIndex2) &&
+                columnIndex == Math.min(range.columnIndex1, range.columnIndex2)
+            ) {
+                return range;
+            }
+        }
+        return null;
     }
     
-    public List<Area> getLists() {
-        return new ArrayList<Area>(areas);
+    public boolean isHiddenByMerge(int rowIndex, int columnIndex) {
+        Iterator<Range> iterator = merges.iterator();
+        while (iterator.hasNext()) {
+            Range range = iterator.next();
+            if (range.contains(rowIndex, columnIndex)) {
+                if (
+                    rowIndex != Math.min(range.rowIndex1, range.rowIndex2) ||
+                    columnIndex != Math.min(range.columnIndex1, range.columnIndex2)
+                ) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
-    public void addMerge(Range range) {
-        merges.add(range);
-    }
-
-    public void addMerge(int rowIndex1, int columnIndex1, int rowIndex2, int columnIndex2) {
-        merges.add(new Range(rowIndex1, columnIndex1, rowIndex2, columnIndex2));
-    }
-    
-    public void removeMerge(Range range) {
-        merges.remove(range);
-    }
-*/
-    public void removeMerge(int rowIndex, int columnIndex) {
+    public void removeMerges(int rowIndex, int columnIndex) {
         Iterator<Range> iterator = merges.iterator();
         while (iterator.hasNext()) {
             Range range = iterator.next();
             if (range.contains(rowIndex, columnIndex)) {
                 iterator.remove();
-                break;
             }
         }
     }
