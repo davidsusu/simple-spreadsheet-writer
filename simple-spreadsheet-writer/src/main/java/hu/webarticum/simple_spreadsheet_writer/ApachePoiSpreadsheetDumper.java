@@ -22,12 +22,12 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
     static protected final int MM_WUS = 100;
     
     @Override
-    public void dump(Spreadsheet spreadheet, File file) throws IOException {
-        dump(spreadheet, new FileOutputStream(file));
+    public void dump(Spreadsheet spreadsheet, File file) throws IOException {
+        dump(spreadsheet, new FileOutputStream(file));
     }
 
     @Override
-    public void dump(Spreadsheet spreadsheet, OutputStream outputStram) throws IOException {
+    public void dump(Spreadsheet spreadsheet, OutputStream outputStream) throws IOException {
         Workbook outputWorkbook = createWorkbook();
         
         for (Spreadsheet.Page page: spreadsheet) {
@@ -71,7 +71,7 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
             }
         }
         
-        outputWorkbook.write(outputStram);
+        outputWorkbook.write(outputStream);
     }
 
     abstract protected Workbook createWorkbook();

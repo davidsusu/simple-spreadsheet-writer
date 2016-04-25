@@ -14,12 +14,12 @@ public class HtmlSpreadsheetDumper implements SpreadsheetDumper {
     }
     
     @Override
-    public void dump(Spreadsheet spreadheet, File file) throws IOException {
-        dump(spreadheet, new FileOutputStream(file));
+    public void dump(Spreadsheet spreadsheet, File file) throws IOException {
+        dump(spreadsheet, new FileOutputStream(file));
     }
 
     @Override
-    public void dump(Spreadsheet spreadheet, OutputStream outputStram) throws IOException {
+    public void dump(Spreadsheet spreadsheet, OutputStream outputStream) throws IOException {
         // TODO
     }
 

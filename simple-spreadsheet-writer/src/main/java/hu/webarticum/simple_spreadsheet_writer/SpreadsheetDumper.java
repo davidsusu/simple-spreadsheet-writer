@@ -8,8 +8,8 @@ public interface SpreadsheetDumper {
 
     public String getDefaultExtension();
     
-    public void dump(Spreadsheet spreadheet, File file) throws IOException;
+    public void dump(Spreadsheet spreadsheet, File file) throws IOException;
     
-    public void dump(Spreadsheet spreadheet, OutputStream outputStram) throws IOException;
+    public void dump(Spreadsheet spreadsheet, OutputStream outputStream) throws IOException;
     
 }

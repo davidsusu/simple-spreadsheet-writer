@@ -33,12 +33,12 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
     }
     
     @Override
-    public void dump(Spreadsheet spreadheet, File file) throws IOException {
-        dump(spreadheet, new FileOutputStream(file));
+    public void dump(Spreadsheet spreadsheet, File file) throws IOException {
+        dump(spreadsheet, new FileOutputStream(file));
     }
 
     @Override
-    public void dump(Spreadsheet spreadsheet, OutputStream outputStram) throws IOException {
+    public void dump(Spreadsheet spreadsheet, OutputStream outputStream) throws IOException {
         SpreadsheetDocument outputDocument;
         try {
             outputDocument = SpreadsheetDocument.newSpreadsheetDocument();
@@ -89,9 +89,11 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         }
         
         try {
-            outputDocument.save(outputStram);
+            outputDocument.save(outputStream);
         } catch (Exception e) {
             throw new IOException(e);
+        } finally {
+            outputStream.close();
         }
     }
     
