@@ -71,6 +71,12 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
                     outputColumn.setWidth(column.width);
                 }
             }
+            for (Sheet.Range mergeRange: sheet.merges) {
+                outputTable.getCellRangeByPosition(
+                    mergeRange.columnIndex1, mergeRange.rowIndex1,
+                    mergeRange.columnIndex2, mergeRange.rowIndex2
+                ).merge();
+            }
             Iterator<Sheet.CellEntry> iterator = sheet.iterator(Sheet.ITERATOR_COMBINED);
             while (iterator.hasNext()) {
                 Sheet.CellEntry cellEntry = iterator.next();
@@ -79,12 +85,6 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
                 outputCell.setDisplayText(cellEntry.cell.text);
                 Sheet.Format computedFormat = cellEntry.getComputedFormat();
                 applyFormat(outputCell, computedFormat);
-            }
-            for (Sheet.Range mergeRange: sheet.merges) {
-                outputTable.getCellRangeByPosition(
-                    mergeRange.columnIndex1, mergeRange.rowIndex1,
-                    mergeRange.columnIndex2, mergeRange.rowIndex2
-                ).merge();
             }
         }
         

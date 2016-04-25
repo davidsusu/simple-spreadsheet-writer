@@ -53,6 +53,12 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
                     outputSheet.setColumnWidth(columnIndex, column.width * MM_WUS);
                 }
             }
+            for (Sheet.Range mergeRange: sheet.merges) {
+                outputSheet.addMergedRegion(new CellRangeAddress(
+                    mergeRange.rowIndex1, mergeRange.rowIndex2,
+                    mergeRange.columnIndex1, mergeRange.columnIndex2
+                ));
+            }
             for (Sheet.CellEntry entry: sheet) {
                 org.apache.poi.ss.usermodel.Row outputRow = outputSheet.getRow(entry.rowIndex);
                 if (outputRow == null) {
@@ -62,12 +68,6 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
                 outputCell.setCellValue(entry.cell.text);
                 applyFormat(outputWorkbook, outputCell, entry.getComputedFormat());
                 applyProblematicFormat(outputWorkbook, outputCell, entry.getComputedFormat());
-            }
-            for (Sheet.Range mergeRange: sheet.merges) {
-                outputSheet.addMergedRegion(new CellRangeAddress(
-                    mergeRange.rowIndex1, mergeRange.rowIndex2,
-                    mergeRange.columnIndex1, mergeRange.columnIndex2
-                ));
             }
         }
         

@@ -32,7 +32,7 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
         XSSFWorkbook workbook = (XSSFWorkbook)outputWorkbook;
         XSSFCell cell = (XSSFCell)outputCell;
         XSSFCellStyle cellStyle = cell.getCellStyle();
-        XSSFFont font = null;
+        XSSFFont font = workbook.createFont(); // XXX
         for (Map.Entry<String, String> entry: format.entrySet()) {
             String property = entry.getKey();
             String value = entry.getValue();
@@ -40,64 +40,48 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
                 cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
                 cellStyle.setFillForegroundColor(getColor(value));
             } else if (property.equals("color")) {
-                if (font == null) {
-                    font = workbook.createFont();
-                }
                 font.setColor(getColor(value));
             } else if (property.equals("font-style")) {
-                if (font == null) {
-                    font = workbook.createFont();
-                }
                 font.setItalic(value.equals("italic"));
             } else if (property.equals("font-weight")) {
-                if (font == null) {
-                    font = workbook.createFont();
-                }
                 font.setBold(value.equals("bold"));
             } else if (property.equals("font-size")) {
-                if (font == null) {
-                    font = workbook.createFont();
-                }
-                double size;
+                short size = font.getFontHeight();
                 if (value.endsWith("pt")) {
-                    size = Double.parseDouble(value.replaceAll("pt$", ""));
+                    size = (short)(Double.parseDouble(value.replaceAll("pt$", "")) * 20);
                 } else if (value.endsWith("%")) {
-                    size = DEFAULT_FONTSIZE * Double.parseDouble(value.replaceAll("%$", "")) / 100;
-                } else {
-                    size = DEFAULT_FONTSIZE;
+                    size = (short)(size * Double.parseDouble(value.replaceAll("%$", "")) / 100);
                 }
                 font.setFontHeight(size);
             } else if (property.equals("border-top")) {
                 String[] tokens = value.split(" ");
                 // XXX
                 double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
-                cellStyle.setBorderTop((size > 1) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
+                cellStyle.setBorderTop((size > 0.9) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
                 cellStyle.setTopBorderColor(getColor(tokens[2]));
             } else if (property.equals("border-right")) {
                 String[] tokens = value.split(" ");
                 // XXX
                 double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
-                cellStyle.setBorderRight((size > 1) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
+                cellStyle.setBorderRight((size > 0.9) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
                 cellStyle.setRightBorderColor(getColor(tokens[2]));
             } else if (property.equals("border-bottom")) {
                 String[] tokens = value.split(" ");
                 // XXX
                 double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
-                cellStyle.setBorderBottom((size > 1) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
+                cellStyle.setBorderBottom((size > 0.9) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
                 cellStyle.setBottomBorderColor(getColor(tokens[2]));
             } else if (property.equals("border-left")) {
                 String[] tokens = value.split(" ");
                 // XXX
                 double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
-                cellStyle.setBorderLeft((size > 1) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
+                cellStyle.setBorderLeft((size > 0.9) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
                 cellStyle.setLeftBorderColor(getColor(tokens[2]));
             }
             
         }
-        if (font != null) {
-            cellStyle.setFont(font);
-        }
-        cell.setCellStyle(cellStyle);
+        // XXX
+        cellStyle.setFont(font);
     }
     
     private XSSFColor getColor(String value) {
