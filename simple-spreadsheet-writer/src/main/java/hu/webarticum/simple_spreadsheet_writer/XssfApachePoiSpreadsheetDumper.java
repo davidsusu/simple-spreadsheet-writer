@@ -24,7 +24,17 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
     
     @Override
     protected Workbook createWorkbook() {
-        return new XSSFWorkbook();
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFCellStyle defaultCellStyle = workbook.getCellStyleAt((short)0);
+        XSSFFont defaultFont = workbook.getFontAt((short)0);
+        normalizeFont(defaultFont);
+        defaultCellStyle.setFont(defaultFont);
+        return workbook;
+    }
+    
+    @Override
+    protected org.apache.poi.ss.usermodel.Sheet createSheet(Workbook outputWorkbook, String label) {
+        return outputWorkbook.createSheet(label);
     }
 
     @Override
@@ -32,7 +42,7 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
         XSSFWorkbook workbook = (XSSFWorkbook)outputWorkbook;
         XSSFCell cell = (XSSFCell)outputCell;
         XSSFCellStyle cellStyle = cell.getCellStyle();
-        XSSFFont font = workbook.createFont(); // XXX
+        XSSFFont font = null;
         for (Map.Entry<String, String> entry: format.entrySet()) {
             String property = entry.getKey();
             String value = entry.getValue();
@@ -40,12 +50,24 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
                 cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
                 cellStyle.setFillForegroundColor(getColor(value));
             } else if (property.equals("color")) {
+                if (font == null) {
+                    font = createFont(workbook);
+                }
                 font.setColor(getColor(value));
             } else if (property.equals("font-style")) {
+                if (font == null) {
+                    font = createFont(workbook);
+                }
                 font.setItalic(value.equals("italic"));
             } else if (property.equals("font-weight")) {
+                if (font == null) {
+                    font = createFont(workbook);
+                }
                 font.setBold(value.equals("bold"));
             } else if (property.equals("font-size")) {
+                if (font == null) {
+                    font = createFont(workbook);
+                }
                 short size = font.getFontHeight();
                 if (value.endsWith("pt")) {
                     size = (short)(Double.parseDouble(value.replaceAll("pt$", "")) * 20);
@@ -80,8 +102,20 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
             }
             
         }
-        // XXX
-        cellStyle.setFont(font);
+        if (font != null) {
+            cellStyle.setFont(font);
+        }
+    }
+
+    private XSSFFont createFont(XSSFWorkbook outputWorkbook) {
+        XSSFFont font = outputWorkbook.createFont();
+        normalizeFont(font);
+        return font;
+    }
+    
+    private void normalizeFont(XSSFFont font) {
+        font.setFontHeight(10);
+        font.setFontName("Arial");
     }
     
     private XSSFColor getColor(String value) {

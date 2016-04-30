@@ -83,6 +83,12 @@ public class Main {
                 System.out.println("Input error!");
                 continue;
             }
+            
+            // XXX
+            if (!line.contains("/")) {
+                line = "/homedata/susu/desktop/" + line;
+            }
+            
             String type = defaultType;
             int perPos = line.lastIndexOf('/');
             int dotPos = line.lastIndexOf('.');

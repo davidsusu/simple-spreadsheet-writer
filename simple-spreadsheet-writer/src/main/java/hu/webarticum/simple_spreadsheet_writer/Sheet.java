@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -1220,41 +1221,37 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
         int height;
         
-        Iterator<Integer> columnIndexIterator;
-
-        Integer currentColumnIndex = null;
-        
         int currentRelativeRowIndex;
+
+        Set<Integer> columnIndexes;
         
+        Iterator<Integer> currentColumnIndexIterator;
+
         public ColumnsPositionIterator() {
-            columnIndexIterator = columns.keySet().iterator();
+            columnIndexes = columns.keySet();
             minRowIndex = getMinRowIndex();
             height = getDefinedHeight();
             currentRelativeRowIndex = height - 1;
+            currentColumnIndexIterator = columnIndexes.iterator();
         }
         
         @Override
         public boolean hasNext() {
-            if (height == 0) {
-                return false;
-            } else if (currentRelativeRowIndex < height - 1) {
-                return true;
-            } else {
-                return columnIndexIterator.hasNext();
-            }
+            return (currentRelativeRowIndex < (height - 1) || currentColumnIndexIterator.hasNext());
         }
         
         @Override
         public int[] next() {
-            if (height > 0 && (currentRelativeRowIndex < height - 1 || columnIndexIterator.hasNext())) {
+            if (currentColumnIndexIterator.hasNext()) {
+                int columnIndex = currentColumnIndexIterator.next();
+                return new int[]{minRowIndex + currentRelativeRowIndex, columnIndex};
+            } else if (currentRelativeRowIndex < (height - 1)) {
                 currentRelativeRowIndex++;
-                if (currentRelativeRowIndex == height) {
-                    currentRelativeRowIndex = 0;
-                    currentColumnIndex = columnIndexIterator.next();
-                }
-                return new int[]{minRowIndex + currentRelativeRowIndex, currentColumnIndex};
+                currentColumnIndexIterator = columnIndexes.iterator();
+                return next();
+            } else {
+                throw new NoSuchElementException();
             }
-            throw new NoSuchElementException();
         }
 
         @Override

@@ -27,6 +27,11 @@ public class HssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
     }
 
     @Override
+    protected org.apache.poi.ss.usermodel.Sheet createSheet(Workbook outputWorkbook, String label) {
+        return outputWorkbook.createSheet(label);
+    }
+
+    @Override
     protected void applyProblematicFormat(Workbook outputWorkbook, org.apache.poi.ss.usermodel.Cell outputCell, Sheet.Format format) {
         HSSFWorkbook workbook = (HSSFWorkbook)outputWorkbook;
         HSSFCell cell = (HSSFCell)outputCell;
@@ -40,22 +45,22 @@ public class HssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
                 cellStyle.setFillForegroundColor(getColor(workbook, value));
             } else if (property.equals("color")) {
                 if (font == null) {
-                    font = workbook.createFont();
+                    font = createFont(workbook);
                 }
                 font.setColor(getColor(workbook, value));
             } else if (property.equals("font-style")) {
                 if (font == null) {
-                    font = workbook.createFont();
+                    font = createFont(workbook);
                 }
                 font.setItalic(value.equals("italic"));
             } else if (property.equals("font-weight")) {
                 if (font == null) {
-                    font = workbook.createFont();
+                    font = createFont(workbook);
                 }
                 font.setBold(value.equals("bold"));
             } else if (property.equals("font-size")) {
                 if (font == null) {
-                    font = workbook.createFont();
+                    font = createFont(workbook);
                 }
                 short size = font.getFontHeight();
                 if (value.endsWith("pt")) {
@@ -93,6 +98,10 @@ public class HssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
         if (font != null) {
             cellStyle.setFont(font);
         }
+    }
+    
+    private HSSFFont createFont(HSSFWorkbook outputWorkbook) {
+        return outputWorkbook.createFont();
     }
     
     private Map<String, Short> colorIndexMap = null;

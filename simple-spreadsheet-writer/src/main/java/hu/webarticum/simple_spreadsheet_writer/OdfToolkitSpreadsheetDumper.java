@@ -1,5 +1,7 @@
 package hu.webarticum.simple_spreadsheet_writer;
 
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,6 +28,8 @@ import hu.webarticum.simple_spreadsheet_writer.util.ColorUtil;
 public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
 
     static protected final int DEFAULT_FONTSIZE = 10;
+
+    static protected final float MM_PTS = 2.834645669291f;
     
     @Override
     public String getDefaultExtension() {
@@ -37,7 +41,6 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         dump(spreadsheet, new FileOutputStream(file));
     }
 
-    @Override
     public void dump(Spreadsheet spreadsheet, OutputStream outputStream) throws IOException {
         SpreadsheetDocument outputDocument;
         try {
@@ -57,20 +60,6 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
                 sheet.moveToNonNegative();
             }
             Table outputTable = outputDocument.appendSheet(page.label);
-            for (Integer rowIndex: sheet.getRowIndexes()) {
-                Row row = sheet.getRow(rowIndex);
-                org.odftoolkit.simple.table.Row outputRow = outputTable.getRowByIndex(rowIndex);
-                if (row.height > 0) {
-                    outputRow.setHeight(row.height, false);
-                }
-            }
-            for (Integer columnIndex: sheet.getColumnIndexes()) {
-                Sheet.Column column = sheet.getColumn(columnIndex);
-                org.odftoolkit.simple.table.Column outputColumn = outputTable.getColumnByIndex(columnIndex);
-                if (column.width > 0) {
-                    outputColumn.setWidth(column.width);
-                }
-            }
             for (Sheet.Range mergeRange: sheet.merges) {
                 outputTable.getCellRangeByPosition(
                     mergeRange.columnIndex1, mergeRange.rowIndex1,
@@ -82,9 +71,50 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
                 Sheet.CellEntry cellEntry = iterator.next();
                 org.odftoolkit.simple.table.Row outputRow = outputTable.getRowByIndex(cellEntry.rowIndex);
                 org.odftoolkit.simple.table.Cell outputCell = outputRow.getCellByIndex(cellEntry.columnIndex);
-                outputCell.setDisplayText(cellEntry.cell.text);
+                fixCell(outputCell);
+                outputCell.setStringValue(cellEntry.cell.text);
                 Sheet.Format computedFormat = cellEntry.getComputedFormat();
-                applyFormat(outputCell, computedFormat);
+                applyFormat(outputCell, computedFormat, cellEntry.rowIndex, cellEntry.columnIndex);
+            }
+            for (Integer rowIndex: sheet.getRowIndexes()) {
+                Row row = sheet.getRow(rowIndex);
+                org.odftoolkit.simple.table.Row outputRow = outputTable.getRowByIndex(rowIndex);
+                if (row.height > 0) {
+                    outputRow.setHeight(row.height, false);
+                } else if (row.height == (-1)) {
+                    outputRow.setUseOptimalHeight(true);
+                }
+            }
+            for (Integer columnIndex: sheet.getColumnIndexes()) {
+                Sheet.Column column = sheet.getColumn(columnIndex);
+                org.odftoolkit.simple.table.Column outputColumn = outputTable.getColumnByIndex(columnIndex);
+                if (column.width > 0) {
+                    outputColumn.setWidth(column.width);
+                } else if (column.width == (-1)) {
+                    outputColumn.setUseOptimalWidth(true);
+                    
+                    // XXX setUseOptimalWidth does not work
+                    double maxWidth = outputColumn.getWidth();
+                    for (int i = outputColumn.getCellCount() -1; i >= 0; i--) {
+                        org.odftoolkit.simple.table.Cell outputCell = outputColumn.getCellByIndex(i);
+                        String value = outputCell.getStringValue();
+                        String[] lines;
+                        if (value.contains("\n")) {
+                            lines = value.split("\\n");
+                        } else {
+                            lines = new String[]{value};
+                        }
+                        for (String line: lines) {
+                            double lineWidth = createAwtFont(outputCell.getFont()).getStringBounds(
+                                line, new FontRenderContext(new AffineTransform(), true, true)
+                            ).getWidth() / MM_PTS;
+                            if (lineWidth > maxWidth) {
+                                maxWidth = lineWidth;
+                            }
+                        }
+                    }
+                    outputColumn.setWidth(maxWidth);
+                }
             }
         }
         
@@ -97,7 +127,27 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         }
     }
     
-    protected void applyFormat(org.odftoolkit.simple.table.Cell outputCell, Sheet.Format format) {
+    // XXX cells created potentially bad
+    protected void fixCell(org.odftoolkit.simple.table.Cell outputCell) {
+        outputCell.setCellBackgroundColor((Color)null);
+        outputCell.setHorizontalAlignment(HorizontalAlignmentType.DEFAULT);
+        outputCell.setVerticalAlignment(VerticalAlignmentType.DEFAULT);
+        outputCell.setTextWrapped(false);
+        outputCell.setBorders(CellBordersType.TOP, null);
+        outputCell.setBorders(CellBordersType.RIGHT, null);
+        outputCell.setBorders(CellBordersType.BOTTOM, null);
+        outputCell.setBorders(CellBordersType.LEFT, null);
+        {
+            Font font = getFont(outputCell);
+            font.setColor(getColor("#000000"));
+            font.setFontStyle(FontStyle.REGULAR);
+            font.setSize(DEFAULT_FONTSIZE);
+            outputCell.setFont(font);
+        }
+        outputCell.removeContent();
+    }
+    
+    protected void applyFormat(org.odftoolkit.simple.table.Cell outputCell, Sheet.Format format, int rowIndex, int columnIndex) {
         for (Map.Entry<String, String> entry: format.entrySet()) {
             String property = entry.getKey();
             String value = entry.getValue();
@@ -127,6 +177,8 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
                 outputCell.setHorizontalAlignment(getHorizontalAligment(value));
             } else if (property.equals("vertical-align")) {
                 outputCell.setVerticalAlignment(getVerticalAlignment(value));
+            } else if (property.equals("white-space")) {
+                outputCell.setTextWrapped(value.matches("pre\\b.*"));
             } else if (property.equals("border-top")) {
                 outputCell.setBorders(CellBordersType.TOP, getBorder(value));
             } else if (property.equals("border-right")) {
@@ -199,20 +251,46 @@ public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
         double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
         Color color = getColor(tokens[2]);
         SupportedLinearMeasure measure = SupportedLinearMeasure.PT;
+        
+        @SuppressWarnings("unused")
         LineStyle lineStyle = LineStyle.SOLID;
         if (tokens[1].equals("dotted")) {
             lineStyle = LineStyle.DOTTED;
         } else if (tokens[1].equals("dashed")) {
             lineStyle = LineStyle.DASH;
         }
+        
         Border border = new Border(color, size, measure);
+        
         // lineStyle???
+        
         return border;
     }
     
     protected Color getColor(String value) {
         int[] parts = ColorUtil.parseColor(value);
         return new Color(parts[0], parts[1], parts[2]);
+    }
+    
+    protected java.awt.Font createAwtFont(Font font) {
+        String fontName = "Arial";
+        FontStyle inputFontStyle = font.getFontStyle();
+        int fontStyle;
+        switch (inputFontStyle) {
+            case BOLD:
+                fontStyle = java.awt.Font.BOLD;
+                break;
+            case ITALIC:
+                fontStyle = java.awt.Font.ITALIC;
+                break;
+            case BOLDITALIC:
+                fontStyle = (java.awt.Font.BOLD | java.awt.Font.ITALIC);
+                break;
+            default:
+                fontStyle = java.awt.Font.PLAIN;
+        }
+        int fontSize = (int)font.getSize();
+        return new java.awt.Font(fontName, fontStyle, fontSize);
     }
     
 }

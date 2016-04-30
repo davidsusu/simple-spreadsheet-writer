@@ -19,7 +19,7 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
     static protected final float MM_PTS = 2.834645669291f;
 
     // XXX
-    static protected final int MM_WUS = 100;
+    static protected final int MM_WUS = 132;
     
     @Override
     public void dump(Spreadsheet spreadsheet, File file) throws IOException {
@@ -30,29 +30,15 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
     public void dump(Spreadsheet spreadsheet, OutputStream outputStream) throws IOException {
         Workbook outputWorkbook = createWorkbook();
         
+        CellStyle heightWrapStyle = null;
+        
         for (Spreadsheet.Page page: spreadsheet) {
             Sheet sheet = page.sheet;
             if (sheet.hasNegative()) {
                 sheet = new Sheet(sheet);
                 sheet.moveToNonNegative();
             }
-            org.apache.poi.ss.usermodel.Sheet outputSheet = outputWorkbook.createSheet(page.label);
-            for (Integer rowIndex: sheet.getRowIndexes()) {
-                Row row = sheet.getRow(rowIndex);
-                org.apache.poi.ss.usermodel.Row outputRow = outputSheet.getRow(rowIndex);
-                if (outputRow == null) {
-                    outputRow = outputSheet.createRow(rowIndex);
-                }
-                if (row.height > 0) {
-                    outputRow.setHeightInPoints(row.height * MM_PTS);
-                }
-            }
-            for (Integer columnIndex: sheet.getColumnIndexes()) {
-                Column column = sheet.getColumn(columnIndex);
-                if (column.width > 0) {
-                    outputSheet.setColumnWidth(columnIndex, column.width * MM_WUS);
-                }
-            }
+            org.apache.poi.ss.usermodel.Sheet outputSheet = createSheet(outputWorkbook, page.label);
             for (Sheet.Range mergeRange: sheet.merges) {
                 outputSheet.addMergedRegion(new CellRangeAddress(
                     mergeRange.rowIndex1, mergeRange.rowIndex2,
@@ -69,13 +55,40 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
                 applyFormat(outputWorkbook, outputCell, entry.getComputedFormat());
                 applyProblematicFormat(outputWorkbook, outputCell, entry.getComputedFormat());
             }
+            for (Integer rowIndex: sheet.getRowIndexes()) {
+                Row row = sheet.getRow(rowIndex);
+                org.apache.poi.ss.usermodel.Row outputRow = outputSheet.getRow(rowIndex);
+                if (outputRow == null) {
+                    outputRow = outputSheet.createRow(rowIndex);
+                }
+                if (row.height > 0) {
+                    outputRow.setHeightInPoints(row.height * MM_PTS);
+                } else if (row.height == (-1)) {
+                    // XXX
+                    if (heightWrapStyle == null) {
+                        heightWrapStyle = outputWorkbook.createCellStyle();
+                        heightWrapStyle.setWrapText(true);
+                    }
+                    outputRow.setRowStyle(heightWrapStyle);
+                }
+            }
+            for (Integer columnIndex: sheet.getColumnIndexes()) {
+                Column column = sheet.getColumn(columnIndex);
+                if (column.width > 0) {
+                    outputSheet.setColumnWidth(columnIndex, column.width * MM_WUS);
+                } else if (column.width == (-1)) {
+                    outputSheet.autoSizeColumn(columnIndex);
+                }
+            }
         }
         
         outputWorkbook.write(outputStream);
     }
 
     abstract protected Workbook createWorkbook();
-    
+
+    abstract protected org.apache.poi.ss.usermodel.Sheet createSheet(Workbook outputWorkbook, String label);
+
     protected void applyFormat(Workbook outputWorkbook, org.apache.poi.ss.usermodel.Cell outputCell, Sheet.Format format) {
         CellStyle cellStyle = outputWorkbook.createCellStyle();
         for (Map.Entry<String, String> entry: format.entrySet()) {
@@ -85,6 +98,8 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
                 cellStyle.setAlignment(getHorizontalAlignment(value));
             } else if (property.equals("vertical-align")) {
                 cellStyle.setVerticalAlignment(getVerticalAlignment(value));
+            } else if (property.equals("white-space")) {
+                cellStyle.setWrapText(value.matches("pre\\b.*"));
             }
             // TODO
         }
