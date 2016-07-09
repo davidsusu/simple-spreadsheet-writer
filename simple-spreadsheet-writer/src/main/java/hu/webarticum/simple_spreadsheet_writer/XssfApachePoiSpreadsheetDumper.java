@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -38,17 +37,15 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
     }
 
     @Override
-    protected void applyProblematicFormat(Workbook outputWorkbook, org.apache.poi.ss.usermodel.Cell outputCell, Sheet.Format format) {
+    protected void applyProblematicFormat(Workbook outputWorkbook, CellStyle cellStyle, Sheet.Format format) {
         XSSFWorkbook workbook = (XSSFWorkbook)outputWorkbook;
-        XSSFCell cell = (XSSFCell)outputCell;
-        XSSFCellStyle cellStyle = cell.getCellStyle();
         XSSFFont font = null;
         for (Map.Entry<String, String> entry: format.entrySet()) {
             String property = entry.getKey();
             String value = entry.getValue();
             if (property.equals("background-color")) {
                 cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-                cellStyle.setFillForegroundColor(getColor(value));
+                ((XSSFCellStyle)cellStyle).setFillForegroundColor(getColor(value));
             } else if (property.equals("color")) {
                 if (font == null) {
                     font = createFont(workbook);
@@ -80,25 +77,25 @@ public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
                 // XXX
                 double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
                 cellStyle.setBorderTop((size > 0.9) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
-                cellStyle.setTopBorderColor(getColor(tokens[2]));
+                ((XSSFCellStyle)cellStyle).setTopBorderColor(getColor(tokens[2]));
             } else if (property.equals("border-right")) {
                 String[] tokens = value.split(" ");
                 // XXX
                 double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
                 cellStyle.setBorderRight((size > 0.9) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
-                cellStyle.setRightBorderColor(getColor(tokens[2]));
+                ((XSSFCellStyle)cellStyle).setRightBorderColor(getColor(tokens[2]));
             } else if (property.equals("border-bottom")) {
                 String[] tokens = value.split(" ");
                 // XXX
                 double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
                 cellStyle.setBorderBottom((size > 0.9) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
-                cellStyle.setBottomBorderColor(getColor(tokens[2]));
+                ((XSSFCellStyle)cellStyle).setBottomBorderColor(getColor(tokens[2]));
             } else if (property.equals("border-left")) {
                 String[] tokens = value.split(" ");
                 // XXX
                 double size = Double.parseDouble(tokens[0].replaceAll("pt$", ""));
                 cellStyle.setBorderLeft((size > 0.9) ? CellStyle.BORDER_MEDIUM : CellStyle.BORDER_THIN);
-                cellStyle.setLeftBorderColor(getColor(tokens[2]));
+                ((XSSFCellStyle)cellStyle).setLeftBorderColor(getColor(tokens[2]));
             }
             
         }

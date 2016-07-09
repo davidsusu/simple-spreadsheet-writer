@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -20,6 +21,8 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
 
     // XXX
     static protected final int MM_WUS = 132;
+    
+    protected HashMap<Sheet.Format, CellStyle> cellStyleMap = new HashMap<Sheet.Format, CellStyle>();
     
     @Override
     public void dump(Spreadsheet spreadsheet, File file) throws IOException {
@@ -53,7 +56,6 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
                 org.apache.poi.ss.usermodel.Cell outputCell = outputRow.createCell(entry.columnIndex);
                 outputCell.setCellValue(entry.cell.text);
                 applyFormat(outputWorkbook, outputCell, entry.getComputedFormat());
-                applyProblematicFormat(outputWorkbook, outputCell, entry.getComputedFormat());
             }
             for (Integer rowIndex: sheet.getRowIndexes()) {
                 Row row = sheet.getRow(rowIndex);
@@ -90,23 +92,29 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
     abstract protected org.apache.poi.ss.usermodel.Sheet createSheet(Workbook outputWorkbook, String label);
 
     protected void applyFormat(Workbook outputWorkbook, org.apache.poi.ss.usermodel.Cell outputCell, Sheet.Format format) {
-        CellStyle cellStyle = outputWorkbook.createCellStyle();
-        for (Map.Entry<String, String> entry: format.entrySet()) {
-            String property = entry.getKey();
-            String value = entry.getValue();
-            if (property.equals("text-align")) {
-                cellStyle.setAlignment(getHorizontalAlignment(value));
-            } else if (property.equals("vertical-align")) {
-                cellStyle.setVerticalAlignment(getVerticalAlignment(value));
-            } else if (property.equals("white-space")) {
-                cellStyle.setWrapText(value.matches("pre\\b.*"));
+        CellStyle cellStyle;
+        if (cellStyleMap.containsKey(format)) {
+            cellStyle = cellStyleMap.get(format);
+        } else {
+            cellStyle = outputWorkbook.createCellStyle();
+            for (Map.Entry<String, String> entry: format.entrySet()) {
+                String property = entry.getKey();
+                String value = entry.getValue();
+                if (property.equals("text-align")) {
+                    cellStyle.setAlignment(getHorizontalAlignment(value));
+                } else if (property.equals("vertical-align")) {
+                    cellStyle.setVerticalAlignment(getVerticalAlignment(value));
+                } else if (property.equals("white-space")) {
+                    cellStyle.setWrapText(value.matches("pre\\b.*"));
+                }
+                // TODO
             }
-            // TODO
+            applyProblematicFormat(outputWorkbook, cellStyle, format);
         }
         outputCell.setCellStyle(cellStyle);
     }
 
-    abstract protected void applyProblematicFormat(Workbook outputWorkbook, org.apache.poi.ss.usermodel.Cell outputCell, Sheet.Format format);
+    abstract protected void applyProblematicFormat(Workbook outputWorkbook, CellStyle cellStyle, Sheet.Format format);
 
     protected TreeMap<String, Short> horizontalAlignmentMap = null;
     protected short getHorizontalAlignment(String value) {
