@@ -1,5 +1,6 @@
 package hu.webarticum.simple_spreadsheet_writer;
 
+import java.io.Serializable;
 import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,8 +18,10 @@ import org.apache.commons.collections4.IteratorUtils;
 
 import hu.webarticum.simple_spreadsheet_writer.util.MergeSortedIterator;
 
-public class Sheet implements Iterable<Sheet.CellEntry> {
+public class Sheet implements Iterable<Sheet.CellEntry>, Serializable {
 
+    private static final long serialVersionUID = 1103646253528004078L;
+    
     static public final int ITERATOR_CELLS = 1;
     static public final int ITERATOR_ROWS = 2;
     static public final int ITERATOR_COLUMNS = 4;
@@ -741,7 +744,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         }
     }
 
-    static public class Row {
+    static public class Row implements Serializable {
+        
+        private static final long serialVersionUID = 404913461715124831L;
 
         public int height = 0;
         
@@ -751,7 +756,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    static public class Column {
+    static public class Column implements Serializable {
+        
+        private static final long serialVersionUID = -9097477064482209541L;
 
         public int width = 0;
         
@@ -759,8 +766,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
 
-    static public class Range {
+    static public class Range implements Serializable {
         
+        private static final long serialVersionUID = 7802500194628611518L;
+
         public int rowIndex1;
         
         public int columnIndex1;
@@ -824,8 +833,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
 
     }
     
-    static public class Area {
+    static public class Area implements Serializable {
         
+        private static final long serialVersionUID = -1559658938655012198L;
+
         public List<Range> ranges = new ArrayList<Range>();
         
         public Format format = new Format();
@@ -917,7 +928,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
 
     }
     
-    static public class Cell {
+    static public class Cell implements Serializable {
+        
+        private static final long serialVersionUID = 2635007596704964845L;
 
         public enum TYPE {TEXT};
         
@@ -958,9 +971,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     // XXX <String, FormatValue>?
     // TODO: rename to Style
     static public class Format extends HashMap<String, String> {
-
-        private static final long serialVersionUID = 1L;
         
+        private static final long serialVersionUID = 8298055204708628226L;
+
         public Format() {
         }
         
@@ -998,8 +1011,8 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
     }
     
     static public class FormatList extends ArrayList<Format> {
-
-        private static final long serialVersionUID = 1L;
+        
+        private static final long serialVersionUID = 6173139136753783258L;
 
         public FormatList() {
             super();
@@ -1021,8 +1034,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    public class CellEntry {
+    public class CellEntry implements Serializable {
         
+        private static final long serialVersionUID = 7644818957028451069L;
+
         public boolean exists;
         
         public int rowIndex;
@@ -1047,7 +1062,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    static public class PositionComparator implements Comparator<int[]> {
+    static public class PositionComparator implements Comparator<int[]>, Serializable {
+        
+        private static final long serialVersionUID = -2236745621288823069L;
 
         @Override
         public int compare(int[] position1, int[] position2) {
@@ -1060,8 +1077,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    protected class CellPositionIterator implements Iterator<int[]> {
+    protected class CellPositionIterator implements Iterator<int[]>, Serializable {
         
+        private static final long serialVersionUID = 7844918356252403696L;
+
         int currentRowIndex;
         
         int currentColumnIndex;
@@ -1110,8 +1129,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
 
-    static public class AreaPositionIterator implements Iterator<int[]> {
-
+    static public class AreaPositionIterator implements Iterator<int[]>, Serializable {
+        
+        private static final long serialVersionUID = 1L;
+        
         private MergeSortedIterator<int[]> mergeIterator;
         
         public AreaPositionIterator(Area area) {
@@ -1139,8 +1160,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    protected class MergesPositionIterator implements Iterator<int[]> {
-
+    protected class MergesPositionIterator implements Iterator<int[]>, Serializable {
+        
+        private static final long serialVersionUID = -3180194426932358695L;
+        
         Iterator<Range> rangeIterator;
         
         public MergesPositionIterator() {
@@ -1165,8 +1188,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
 
-    protected class RowsPositionIterator implements Iterator<int[]> {
+    protected class RowsPositionIterator implements Iterator<int[]>, Serializable {
         
+        private static final long serialVersionUID = -1327423140457497755L;
+
         int minColumnIndex;
         
         int width;
@@ -1215,8 +1240,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
 
-    protected class ColumnsPositionIterator implements Iterator<int[]> {
+    protected class ColumnsPositionIterator implements Iterator<int[]>, Serializable {
         
+        private static final long serialVersionUID = -7631539541709739767L;
+
         int minRowIndex;
         
         int height;
@@ -1261,8 +1288,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    protected class AllPositionIterator implements Iterator<int[]> {
+    protected class AllPositionIterator implements Iterator<int[]>, Serializable {
         
+        private static final long serialVersionUID = 2409859047902384L;
+
         int width;
         
         int height;
@@ -1323,7 +1352,9 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    static public class RangePositionIterator implements Iterator<int[]> {
+    static public class RangePositionIterator implements Iterator<int[]>, Serializable {
+
+        private static final long serialVersionUID = 1312918803971305302L;
 
         int startRowIndex;
 
@@ -1383,8 +1414,10 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
         
     }
     
-    public class PositionCellEntryIterator implements Iterator<CellEntry> {
+    public class PositionCellEntryIterator implements Iterator<CellEntry>, Serializable {
 
+        private static final long serialVersionUID = 4044847177042376666L;
+        
         private Iterator<int[]> positionIterator;
         
         PositionCellEntryIterator(Iterator<int[]> positionIterator) {

@@ -12,6 +12,7 @@ import java.util.Map;
 import hu.webarticum.simple_spreadsheet_writer.HssfApachePoiSpreadsheetDumper;
 import hu.webarticum.simple_spreadsheet_writer.HtmlSpreadsheetDumper;
 import hu.webarticum.simple_spreadsheet_writer.OdfToolkitSpreadsheetDumper;
+import hu.webarticum.simple_spreadsheet_writer.SerializeSpreadsheetDumper;
 import hu.webarticum.simple_spreadsheet_writer.Spreadsheet;
 import hu.webarticum.simple_spreadsheet_writer.SpreadsheetDumper;
 import hu.webarticum.simple_spreadsheet_writer.XssfApachePoiSpreadsheetDumper;
@@ -22,6 +23,7 @@ public class Main {
         List<Example> examples = new ArrayList<Example>();
         examples.add(new TimeTableExample());
         examples.add(new LotOfCellsExample());
+        examples.add(new UnserializeExample());
         
         System.out.println("Examples:");
         int count = examples.size();
@@ -66,6 +68,7 @@ public class Main {
         dumpers.add(new HssfApachePoiSpreadsheetDumper());
         dumpers.add(new XssfApachePoiSpreadsheetDumper());
         dumpers.add(new HtmlSpreadsheetDumper());
+        dumpers.add(new SerializeSpreadsheetDumper());
         
         Map<String, SpreadsheetDumper> dumperMap = new LinkedHashMap<String, SpreadsheetDumper>();
         for (SpreadsheetDumper dumper: dumpers) {
