@@ -970,7 +970,7 @@ public class Sheet implements Iterable<Sheet.CellEntry> {
             }
         }
         
-        public Format(String[] propertiesAndValues) {
+        public Format(String... propertiesAndValues) {
             int size = propertiesAndValues.length / 2;
             for (int i = 0; i < size; i++) {
                 this.put(propertiesAndValues[i * 2], propertiesAndValues[i * 2 + 1]);

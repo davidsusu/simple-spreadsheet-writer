@@ -110,6 +110,7 @@ abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
                 // TODO
             }
             applyProblematicFormat(outputWorkbook, cellStyle, format);
+            cellStyleMap.put(format, cellStyle);
         }
         outputCell.setCellStyle(cellStyle);
     }

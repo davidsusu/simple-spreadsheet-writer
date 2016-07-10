@@ -21,6 +21,7 @@ public class Main {
     public static void main(String[] args) {
         List<Example> examples = new ArrayList<Example>();
         examples.add(new TimeTableExample());
+        examples.add(new LotOfCellsExample());
         
         System.out.println("Examples:");
         int count = examples.size();
