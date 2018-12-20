@@ -1,9 +1,9 @@
-package hu.webarticum.simple_spreadsheet_writer.util;
+package hu.webarticum.simplespreadsheetwriter.util;
 
 import org.apache.commons.collections4.IteratorUtils;
 import org.junit.Test;
 
-import hu.webarticum.simple_spreadsheet_writer.util.MergeSortedIterator;
+import hu.webarticum.simplespreadsheetwriter.util.MergeSortedIterator;
 
 import static org.junit.Assert.*;
 

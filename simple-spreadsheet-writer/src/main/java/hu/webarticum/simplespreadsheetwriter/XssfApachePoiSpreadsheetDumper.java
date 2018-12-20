@@ -1,4 +1,4 @@
-package hu.webarticum.simple_spreadsheet_writer;
+package hu.webarticum.simplespreadsheetwriter;
 
 import java.util.Map;
 
@@ -9,7 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import hu.webarticum.simple_spreadsheet_writer.util.ColorUtil;
+import hu.webarticum.simplespreadsheetwriter.util.ColorUtil;
 
 public class XssfApachePoiSpreadsheetDumper extends ApachePoiSpreadsheetDumper {
 

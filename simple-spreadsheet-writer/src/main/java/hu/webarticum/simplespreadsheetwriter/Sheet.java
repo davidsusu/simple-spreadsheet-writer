@@ -1,4 +1,4 @@
-package hu.webarticum.simple_spreadsheet_writer;
+package hu.webarticum.simplespreadsheetwriter;
 
 import java.io.Serializable;
 import java.nio.channels.UnsupportedAddressTypeException;
@@ -16,7 +16,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.collections4.IteratorUtils;
 
-import hu.webarticum.simple_spreadsheet_writer.util.MergeSortedIterator;
+import hu.webarticum.simplespreadsheetwriter.util.MergeSortedIterator;
 
 public class Sheet implements Iterable<Sheet.CellEntry>, Serializable {
 

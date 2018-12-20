@@ -1,8 +1,10 @@
-package hu.webarticum.simple_spreadsheet_writer.util;
+package hu.webarticum.simplespreadsheetwriter.util;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import hu.webarticum.simplespreadsheetwriter.util.ColorUtil;
 
 
 public class ColorUtilTest {

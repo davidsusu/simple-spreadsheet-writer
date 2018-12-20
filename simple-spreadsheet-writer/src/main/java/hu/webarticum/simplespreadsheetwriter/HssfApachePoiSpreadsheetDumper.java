@@ -1,4 +1,4 @@
-package hu.webarticum.simple_spreadsheet_writer;
+package hu.webarticum.simplespreadsheetwriter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import hu.webarticum.simple_spreadsheet_writer.util.ColorUtil;
+import hu.webarticum.simplespreadsheetwriter.util.ColorUtil;
 
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFPalette;

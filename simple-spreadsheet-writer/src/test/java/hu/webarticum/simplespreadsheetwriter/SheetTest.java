@@ -1,7 +1,9 @@
-package hu.webarticum.simple_spreadsheet_writer;
+package hu.webarticum.simplespreadsheetwriter;
 
 import org.apache.commons.collections4.IteratorUtils;
 import org.junit.Test;
+
+import hu.webarticum.simplespreadsheetwriter.Sheet;
 
 import static org.junit.Assert.*;
 

@@ -1,4 +1,4 @@
-package hu.webarticum.simple_spreadsheet_writer.example;
+package hu.webarticum.simplespreadsheetwriter.example;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 
-import hu.webarticum.simple_spreadsheet_writer.Spreadsheet;
+import hu.webarticum.simplespreadsheetwriter.Spreadsheet;
 
 
 public class UnserializeExample implements Example {

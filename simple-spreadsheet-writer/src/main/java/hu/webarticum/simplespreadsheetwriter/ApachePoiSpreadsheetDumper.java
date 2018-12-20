@@ -1,4 +1,4 @@
-package hu.webarticum.simple_spreadsheet_writer;
+package hu.webarticum.simplespreadsheetwriter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,8 +12,8 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-import hu.webarticum.simple_spreadsheet_writer.Sheet.Column;
-import hu.webarticum.simple_spreadsheet_writer.Sheet.Row;
+import hu.webarticum.simplespreadsheetwriter.Sheet.Column;
+import hu.webarticum.simplespreadsheetwriter.Sheet.Row;
 
 abstract public class ApachePoiSpreadsheetDumper implements SpreadsheetDumper {
 

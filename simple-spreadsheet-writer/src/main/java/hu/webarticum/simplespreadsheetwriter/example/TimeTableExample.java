@@ -1,7 +1,7 @@
-package hu.webarticum.simple_spreadsheet_writer.example;
+package hu.webarticum.simplespreadsheetwriter.example;
 
-import hu.webarticum.simple_spreadsheet_writer.Sheet;
-import hu.webarticum.simple_spreadsheet_writer.Spreadsheet;
+import hu.webarticum.simplespreadsheetwriter.Sheet;
+import hu.webarticum.simplespreadsheetwriter.Spreadsheet;
 
 public class TimeTableExample implements Example {
 

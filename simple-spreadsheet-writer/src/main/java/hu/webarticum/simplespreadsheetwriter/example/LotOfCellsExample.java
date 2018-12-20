@@ -1,11 +1,11 @@
-package hu.webarticum.simple_spreadsheet_writer.example;
+package hu.webarticum.simplespreadsheetwriter.example;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import hu.webarticum.simple_spreadsheet_writer.Sheet;
-import hu.webarticum.simple_spreadsheet_writer.Spreadsheet;
+import hu.webarticum.simplespreadsheetwriter.Sheet;
+import hu.webarticum.simplespreadsheetwriter.Spreadsheet;
 
 
 public class LotOfCellsExample implements Example {

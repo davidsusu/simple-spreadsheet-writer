@@ -1,4 +1,4 @@
-package hu.webarticum.simple_spreadsheet_writer;
+package hu.webarticum.simplespreadsheetwriter;
 
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -22,8 +22,8 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions.SupportedLinearMeasure;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.VerticalAlignmentType;
 import org.odftoolkit.simple.table.Table;
 
-import hu.webarticum.simple_spreadsheet_writer.Sheet.Row;
-import hu.webarticum.simple_spreadsheet_writer.util.ColorUtil;
+import hu.webarticum.simplespreadsheetwriter.Sheet.Row;
+import hu.webarticum.simplespreadsheetwriter.util.ColorUtil;
 
 public class OdfToolkitSpreadsheetDumper implements SpreadsheetDumper {
 

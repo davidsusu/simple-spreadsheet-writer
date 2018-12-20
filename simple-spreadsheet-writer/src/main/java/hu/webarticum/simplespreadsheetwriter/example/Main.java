@@ -1,5 +1,6 @@
-package hu.webarticum.simple_spreadsheet_writer.example;
+package hu.webarticum.simplespreadsheetwriter.example;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -9,13 +10,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import hu.webarticum.simple_spreadsheet_writer.HssfApachePoiSpreadsheetDumper;
-import hu.webarticum.simple_spreadsheet_writer.HtmlSpreadsheetDumper;
-import hu.webarticum.simple_spreadsheet_writer.OdfToolkitSpreadsheetDumper;
-import hu.webarticum.simple_spreadsheet_writer.SerializeSpreadsheetDumper;
-import hu.webarticum.simple_spreadsheet_writer.Spreadsheet;
-import hu.webarticum.simple_spreadsheet_writer.SpreadsheetDumper;
-import hu.webarticum.simple_spreadsheet_writer.XssfApachePoiSpreadsheetDumper;
+import hu.webarticum.simplespreadsheetwriter.HssfApachePoiSpreadsheetDumper;
+import hu.webarticum.simplespreadsheetwriter.HtmlSpreadsheetDumper;
+import hu.webarticum.simplespreadsheetwriter.OdfToolkitSpreadsheetDumper;
+import hu.webarticum.simplespreadsheetwriter.SerializeSpreadsheetDumper;
+import hu.webarticum.simplespreadsheetwriter.Spreadsheet;
+import hu.webarticum.simplespreadsheetwriter.SpreadsheetDumper;
+import hu.webarticum.simplespreadsheetwriter.XssfApachePoiSpreadsheetDumper;
 
 public class Main {
 
@@ -76,7 +77,8 @@ public class Main {
         }
         
         String defaultType = "ods";
-
+        
+        File outFile = null;
         Spreadsheet spreadsheet = null;
         while (true) {
             System.out.print("Output file: ");
@@ -88,9 +90,8 @@ public class Main {
                 continue;
             }
             
-            // XXX
             if (!line.contains("/")) {
-                line = "/homedata/susu/desktop/" + line;
+                line = "/tmp/" + line;
             }
             
             String type = defaultType;
@@ -105,14 +106,17 @@ public class Main {
                 System.out.println("Unknown extension!");
                 continue;
             }
+
+            outFile = new File(line);
             
             SpreadsheetDumper dumper = dumperMap.get(type);
             
             if (spreadsheet == null) {
                 spreadsheet = example.create();
             }
+
             try {
-                dumper.dump(spreadsheet, new File(line));
+                dumper.dump(spreadsheet, outFile);
             } catch (IOException e) {
                 System.out.println("Saving failed: " + e.getMessage());
                 continue;
@@ -122,6 +126,21 @@ public class Main {
         }
         
         System.out.println("File saved successfully!");
+        
+        Desktop desktop = null;
+        try {
+            desktop = Desktop.getDesktop();
+        } catch (UnsupportedOperationException e) {
+        }
+        if (desktop == null) {
+            System.out.println("No desktop is available!");
+        }
+        
+        try {
+            desktop.open(outFile);
+        } catch (IOException e) {
+            System.out.println("Failed to open file!");
+        }
     }
 
 }

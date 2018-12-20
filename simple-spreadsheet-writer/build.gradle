@@ -6,7 +6,7 @@ sourceCompatibility = "1.6";
 targetCompatibility = "1.6";
 
 group = 'hu.webarticum'
-version = '0.4'
+version = '0.5'
 description = 'Minimalist library for composing simple spreadsheets'
 
 def scmUrl = 'https://github.com/davidsusu/simple-spreadsheet-writer.git'
@@ -45,7 +45,7 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-uploadArchives {
+if (hasProperty('mavenRepositoryUrl')) uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: project.ext.mavenRepositoryUrl) {

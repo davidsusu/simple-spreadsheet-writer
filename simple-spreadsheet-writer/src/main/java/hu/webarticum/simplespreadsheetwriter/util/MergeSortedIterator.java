@@ -1,4 +1,4 @@
-package hu.webarticum.simple_spreadsheet_writer.util;
+package hu.webarticum.simplespreadsheetwriter.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
